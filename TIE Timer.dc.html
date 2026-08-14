@@ -1,0 +1,1144 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+html, body { margin: 0; padding: 0; background: #0c0824; }
+a { color: #ffaf00; text-decoration: none; }
+a:hover { color: #b300ff; }
+input { font: inherit; }
+::selection { background: rgba(147,0,255,0.4); }
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-thumb { background: rgba(147,0,255,0.35); border-radius: 999px; }
+::-webkit-scrollbar-track { background: transparent; }
+@keyframes tiePulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
+@keyframes tieSweep { 0% { transform: translateX(-120%); } 100% { transform: translateX(320%); } }
+@keyframes tieDrift { from { background-position: 0 0, 0 0; } to { background-position: 0 60px, 60px 0; } }
+</style>
+</helmet>
+
+<div style="background: #0c0824; min-height: 100vh; padding: 56px; box-sizing: border-box; font-family: 'Roboto', system-ui, sans-serif; color: #ffffff;">
+
+<section style="display: flex; flex-direction: column; gap: 34px; padding-bottom: 64px; margin-bottom: 30px; border-bottom: 1px solid rgba(147,0,255,0.2);">
+
+  <div style="display: flex; flex-direction: column; gap: 13px; max-width: 780px;">
+    <span style="font-family: 'Space Grotesk', sans-serif; font-weight: 500; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: #ffaf00;">Turn 3 · To-Dos And The Weekly Review</span>
+    <h2 style="margin: 0; font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 34px; line-height: 1.1; letter-spacing: -0.01em; color: #ffffff;">Close The Day, Then Read The Week</h2>
+    <p style="margin: 0; font-size: 16px; line-height: 1.55; color: rgba(255,255,255,0.68); text-wrap: pretty;">Every task row now carries a checkbox, so the list you track against is the same list you tick off. At the end of the day the app counts what is still open and asks you what to do about it. On Friday the review window turns five days of intervals into an answer about where the time actually went.</p>
+    <p style="margin: 0; font-size: 14px; line-height: 1.6; color: rgba(255,255,255,0.45);">Tick a task in <a href="#1a">1a</a> and watch the reminder in <a href="#3a">3a</a> update — they read the same list.</p>
+  </div>
+
+  <div style="display: flex; flex-wrap: wrap; gap: 40px; align-items: flex-start;">
+
+    <div id="3a" style="display: flex; flex-direction: column; gap: 16px;">
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <span style="display: inline-flex; align-items: center; justify-content: center; min-width: 34px; height: 24px; padding: 0 9px; border-radius: 999px; background: linear-gradient(135deg, #4500ff, #b300ff); font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 11px; letter-spacing: 0.12em; color: #ffffff;">3A</span>
+        <h3 style="margin: 0; font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 20px; color: #ffffff;">End-of-day reminder</h3>
+      </div>
+
+      <div style="position: relative; width: 400px; height: 386px; border-radius: 18px; overflow: hidden; border: 1px solid rgba(147,0,255,0.22); background: radial-gradient(120% 90% at 80% 0%, #241a5c 0%, #150f33 60%, #0c0824 100%); display: flex; align-items: flex-start; justify-content: flex-end; padding: 18px; box-sizing: border-box;">
+        <div style="position: absolute; inset: 0; background-image: linear-gradient(rgba(147,0,255,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(147,0,255,0.06) 1px, transparent 1px); background-size: 60px 60px;"></div>
+
+        <sc-if value="{{ remOpen }}" hint-placeholder-val="{{ true }}">
+          <div style="position: relative; width: 316px; box-sizing: border-box; border-radius: 20px; border: 1px solid rgba(147,0,255,0.4); background: linear-gradient(160deg, rgba(30,23,71,0.97), rgba(21,15,51,0.98)); backdrop-filter: blur(20px); box-shadow: 0 20px 60px rgba(0,0,0,0.55), 0 0 44px rgba(147,0,255,0.2); padding: 16px; display: flex; flex-direction: column; gap: 13px;">
+            <div style="display: flex; align-items: center; gap: 9px;">
+              <img src="assets/logo-transparent.svg" alt="" style="width: 16px; height: 16px; display: block;">
+              <span style="font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255,255,255,0.55);">TIE Timer</span>
+              <span style="flex: 1;"></span>
+              <span style="font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace; font-size: 11px; color: #ffaf00;">{{ remTime }}</span>
+              <button onClick="{{ remDismiss }}" title="Dismiss" style="width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; border: none; background: transparent; cursor: pointer; color: rgba(255,255,255,0.3); transition: color 180ms ease;" style-hover="color: #ff5d8f;">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"></path></svg>
+              </button>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+              <h4 style="margin: 0; font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 16.5px; line-height: 1.25; color: #ffffff;">{{ remHeadline }}</h4>
+              <p style="margin: 0; font-size: 13px; line-height: 1.5; color: rgba(255,255,255,0.6);">{{ remSub }}</p>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 7px;">
+              <sc-for list="{{ remTasks }}" as="o" hint-placeholder-count="3">
+                <div style="display: flex; align-items: center; gap: 9px; padding: 9px 11px; border-radius: 11px; background: rgba(12,8,36,0.5); border: 1px solid rgba(147,0,255,0.16);">
+                  <button onClick="{{ o.onDone }}" title="Mark done" style="flex: none; width: 15px; height: 15px; border-radius: 4px; padding: 0; cursor: pointer; background: transparent; transition: all 180ms ease; border: 1.5px solid {{ o.color }};" style-hover="transform: scale(1.14);"></button>
+                  <span style="flex: 1; min-width: 0; font-family: 'Space Grotesk', sans-serif; font-weight: 500; font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: rgba(255,255,255,0.88);">{{ o.name }}</span>
+                  <span style="font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace; font-size: 11.5px; font-variant-numeric: tabular-nums; color: rgba(255,255,255,0.45);">{{ o.time }}</span>
+                </div>
+              </sc-for>
+              <sc-if value="{{ remEmpty }}" hint-placeholder-val="{{ false }}">
+                <div style="padding: 14px 11px; border-radius: 11px; background: rgba(52,211,154,0.1); border: 1px solid rgba(52,211,154,0.3); font-size: 12.5px; line-height: 1.45; color: rgba(255,255,255,0.8);">Everything on today's list is ticked off. Nothing carries over.</div>
+              </sc-if>
+            </div>
+
+            <div style="display: flex; gap: 8px;">
+              <button onClick="{{ remCarry }}" style="flex: 1; padding: 10px 12px; border-radius: 999px; border: none; cursor: pointer; background: linear-gradient(135deg, #4500ff, #b300ff); font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 12.5px; color: #ffffff; transition: all 300ms cubic-bezier(0.22,0.61,0.36,1);" style-hover="transform: translateY(-3px); box-shadow: 0 0 40px rgba(147,0,255,0.6);">Carry Over</button>
+              <button onClick="{{ remAllDone }}" style="flex: 1; padding: 10px 12px; border-radius: 999px; cursor: pointer; background: transparent; border: 1px solid rgba(147,0,255,0.4); font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 12.5px; color: rgba(255,255,255,0.8); transition: all 300ms cubic-bezier(0.22,0.61,0.36,1);" style-hover="background: rgba(147,0,255,0.12); border-color: #9300ff; color: #ffffff; transform: translateY(-3px);">Mark All Done</button>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ remClosed }}" hint-placeholder-val="{{ false }}">
+          <button onClick="{{ remShow }}" style="position: relative; padding: 11px 18px; border-radius: 999px; cursor: pointer; background: transparent; border: 1.5px dashed rgba(147,0,255,0.4); font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 12.5px; color: rgba(255,255,255,0.7); transition: all 300ms cubic-bezier(0.22,0.61,0.36,1);" style-hover="background: rgba(147,0,255,0.12); border-color: #9300ff; color: #ffffff;">Show The Reminder Again</button>
+        </sc-if>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 7px; max-width: 400px;">
+        <span style="font-size: 13px; line-height: 1.5; color: rgba(255,255,255,0.5);">Fires as a native notification on both platforms — Action Center on Windows, Notification Centre on macOS — so it reaches you even if the widget is hidden. Carry Over keeps the unticked tasks and their notes on tomorrow's list with the clocks back at zero.</span>
+      </div>
+    </div>
+
+    <div id="3b" style="display: flex; flex-direction: column; gap: 16px;">
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <span style="display: inline-flex; align-items: center; justify-content: center; min-width: 34px; height: 24px; padding: 0 9px; border-radius: 999px; background: linear-gradient(135deg, #4500ff, #b300ff); font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 11px; letter-spacing: 0.12em; color: #ffffff;">3B</span>
+        <h3 style="margin: 0; font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 20px; color: #ffffff;">Weekly review</h3>
+        <span style="font-size: 13px; color: rgba(255,255,255,0.4);">a real window, not the widget</span>
+      </div>
+
+      <div style="width: 880px; box-sizing: border-box; border-radius: 24px; overflow: hidden; border: 1px solid rgba(147,0,255,0.3); background: linear-gradient(160deg, rgba(30,23,71,0.9), rgba(21,15,51,0.96)); box-shadow: 0 24px 60px rgba(0,0,0,0.5);">
+        <div style="display: flex; align-items: center; gap: 10px; padding: 14px 20px; border-bottom: 1px solid rgba(147,0,255,0.2); background: rgba(12,8,36,0.4);">
+          <span style="width: 11px; height: 11px; border-radius: 999px; background: rgba(255,255,255,0.14);"></span>
+          <span style="width: 11px; height: 11px; border-radius: 999px; background: rgba(255,255,255,0.14);"></span>
+          <span style="width: 11px; height: 11px; border-radius: 999px; background: rgba(255,255,255,0.14);"></span>
+          <span style="flex: 1;"></span>
+          <img src="assets/logo-transparent.svg" alt="" style="width: 15px; height: 15px; display: block;">
+          <span style="font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.5);">Weekly Review</span>
+          <span style="flex: 1;"></span>
+        </div>
+
+        <div style="padding: 26px 28px 28px; display: flex; flex-direction: column; gap: 24px;">
+
+          <div style="display: flex; align-items: flex-end; gap: 20px; flex-wrap: wrap;">
+            <div style="display: flex; flex-direction: column; gap: 5px;">
+              <span style="font-family: 'Space Grotesk', sans-serif; font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: rgba(255,255,255,0.4);">Week of 10 August 2026</span>
+              <h4 style="margin: 0; font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 27px; line-height: 1.15; letter-spacing: -0.01em; color: #ffffff;">Where The Week Went</h4>
+            </div>
+            <span style="flex: 1;"></span>
+            <div style="display: flex; gap: 26px;">
+              <div style="display: flex; flex-direction: column; gap: 3px;">
+                <span style="font-family: 'Space Grotesk', sans-serif; font-size: 9.5px; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255,255,255,0.4);">Tracked</span>
+                <span style="font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace; font-size: 22px; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; color: #ffffff;">{{ wkTotal }}</span>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 3px;">
+                <span style="font-family: 'Space Grotesk', sans-serif; font-size: 9.5px; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255,255,255,0.4);">Daily average</span>
+                <span style="font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace; font-size: 22px; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; color: #ffffff;">{{ wkAvg }}</span>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 3px;">
+                <span style="font-family: 'Space Grotesk', sans-serif; font-size: 9.5px; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255,255,255,0.4);">Tasks</span>
+                <span style="font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace; font-size: 22px; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; color: #ffffff;">{{ wkCount }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div style="height: 2px; border-radius: 999px; background: linear-gradient(90deg, #150088, #4500ff, #9300ff, #b300ff, #ffaf00);"></div>
+
+          <div style="display: flex; gap: 30px; align-items: flex-start;">
+
+            <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 13px;">
+              <span style="font-family: 'Space Grotesk', sans-serif; font-size: 9.5px; letter-spacing: 0.15em; text-transform: uppercase; color: rgba(255,255,255,0.4);">By Task</span>
+              <div style="display: flex; flex-direction: column; gap: 13px;">
+                <sc-for list="{{ wkTasks }}" as="w" hint-placeholder-count="5">
+                  <div style="display: flex; flex-direction: column; gap: 7px;">
+                    <div style="display: flex; align-items: center; gap: 9px;">
+                      <span style="flex: none; width: 9px; height: 9px; border-radius: 2px; transform: rotate(45deg); background: {{ w.color }};"></span>
+                      <span style="font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 14px; color: {{ w.nameColor }};">{{ w.name }}</span>
+                      <sc-if value="{{ w.top }}" hint-placeholder-val="{{ false }}">
+                        <span style="padding: 3px 9px; border-radius: 999px; border: 1px solid rgba(255,175,0,0.45); background: rgba(255,175,0,0.12); font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: #ffaf00;">Most Time</span>
+                      </sc-if>
+                      <span style="flex: 1;"></span>
+                      <span style="font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace; font-size: 13.5px; font-variant-numeric: tabular-nums; color: #ffffff;">{{ w.hours }}</span>
+                      <span style="font-family: 'Space Grotesk', sans-serif; font-size: 12px; min-width: 38px; text-align: right; color: rgba(255,255,255,0.4);">{{ w.pct }}</span>
+                    </div>
+                    <div style="height: 8px; border-radius: 999px; overflow: hidden; background: rgba(12,8,36,0.6); border: 1px solid rgba(147,0,255,0.14);">
+                      <div style="height: 100%; border-radius: 999px; width: {{ w.barW }}; background: {{ w.color }};"></div>
+                    </div>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+
+            <div style="flex: none; width: 258px; display: flex; flex-direction: column; gap: 13px;">
+              <span style="font-family: 'Space Grotesk', sans-serif; font-size: 9.5px; letter-spacing: 0.15em; text-transform: uppercase; color: rgba(255,255,255,0.4);">By Day</span>
+              <div style="display: flex; align-items: flex-end; gap: 10px; height: 186px; padding: 14px 14px 0; box-sizing: border-box; border-radius: 14px; background: rgba(12,8,36,0.42); border: 1px solid rgba(147,0,255,0.14);">
+                <sc-for list="{{ wkDays }}" as="d" hint-placeholder-count="5">
+                  <div style="flex: 1; display: flex; flex-direction: column; justify-content: flex-end; height: 100%; gap: 7px;">
+                    <div style="display: flex; flex-direction: column; justify-content: flex-end; gap: 2px; height: {{ d.h }};">
+                      <sc-for list="{{ d.segs }}" as="g" hint-placeholder-count="4">
+                        <div style="border-radius: 2px; height: {{ g.h }}; background: {{ g.color }};"></div>
+                      </sc-for>
+                    </div>
+                    <span style="font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 10px; text-align: center; letter-spacing: 0.06em; color: {{ d.labelColor }};">{{ d.label }}</span>
+                  </div>
+                </sc-for>
+              </div>
+              <div style="display: flex; justify-content: space-between; padding: 0 3px;">
+                <span style="font-size: 12px; color: rgba(255,255,255,0.4);">Longest day</span>
+                <span style="font-family: ui-monospace, monospace; font-size: 12px; color: rgba(255,255,255,0.75);">{{ wkLongest }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 10px; padding: 18px 20px; border-radius: 16px; background: rgba(12,8,36,0.45); border: 1px solid rgba(147,0,255,0.18);">
+            <span style="font-family: 'Space Grotesk', sans-serif; font-size: 9.5px; letter-spacing: 0.15em; text-transform: uppercase; color: rgba(255,255,255,0.4);">Worth Noticing</span>
+            <sc-for list="{{ wkNotes }}" as="n" hint-placeholder-count="3">
+              <div style="display: flex; align-items: flex-start; gap: 10px;">
+                <span style="flex: none; font-size: 12px; line-height: 1.5; color: #ffaf00;">◆</span>
+                <span style="font-size: 14px; line-height: 1.5; color: rgba(255,255,255,0.78); text-wrap: pretty;">{{ n.text }}</span>
+              </div>
+            </sc-for>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<section style="display: flex; flex-direction: column; gap: 34px; padding-bottom: 64px; margin-bottom: 30px; border-bottom: 1px solid rgba(147,0,255,0.2);">
+
+  <div style="display: flex; flex-direction: column; gap: 13px; max-width: 760px;">
+    <span style="font-family: 'Space Grotesk', sans-serif; font-weight: 500; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: #ffaf00;">Turn 2 · The Edge Bar</span>
+    <h2 style="margin: 0; font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 34px; line-height: 1.1; letter-spacing: -0.01em; color: #ffffff;">What Stays On Screen When The Panel Hides</h2>
+    <p style="margin: 0; font-size: 16px; line-height: 1.55; color: rgba(255,255,255,0.68); text-wrap: pretty;">Three weights of the same idea, drawn at real size against a screen edge. All of them carry the running task's colour and expand the full panel on click. They differ in how much they say, and in how much room they take when you are not looking at them.</p>
+    <p style="margin: 0; font-size: 14px; line-height: 1.6; color: rgba(255,255,255,0.45);"><a href="#1a">1a</a> and <a href="#1b">1b</a> currently use the pill from <a href="#2b">2b</a>. Tell me which weight you want and I will wire it into both docks.</p>
+  </div>
+
+  <div style="display: flex; flex-wrap: wrap; gap: 40px; align-items: flex-start;">
+
+    <div id="2a" style="display: flex; flex-direction: column; gap: 16px;">
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <span style="display: inline-flex; align-items: center; justify-content: center; min-width: 34px; height: 24px; padding: 0 9px; border-radius: 999px; background: linear-gradient(135deg, #4500ff, #b300ff); font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 11px; letter-spacing: 0.12em; color: #ffffff;">2A</span>
+        <h3 style="margin: 0; font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 20px; color: #ffffff;">Vertical rail</h3>
+        <span style="font-size: 13px; color: rgba(255,255,255,0.4);">for the side docks</span>
+      </div>
+
+      <div style="display: flex; gap: 16px; flex-wrap: wrap;">
+
+        <div style="display: flex; flex-direction: column; gap: 11px;">
+          <div style="position: relative; width: 236px; height: 300px; border-radius: 16px; overflow: hidden; border: 1px solid rgba(147,0,255,0.22); background: radial-gradient(120% 90% at 20% 0%, #241a5c 0%, #150f33 60%, #0c0824 100%);">
+            <div style="position: absolute; inset: 0; background-image: linear-gradient(rgba(147,0,255,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(147,0,255,0.06) 1px, transparent 1px); background-size: 60px 60px;"></div>
+            <div style="position: absolute; left: 20px; top: 30px; right: 76px; display: flex; flex-direction: column; gap: 8px;">
+              <span style="height: 6px; border-radius: 999px; background: rgba(255,255,255,0.07); width: 88%;"></span>
+              <span style="height: 6px; border-radius: 999px; background: rgba(255,255,255,0.07); width: 64%;"></span>
+              <span style="height: 6px; border-radius: 999px; background: rgba(255,255,255,0.05); width: 78%;"></span>
+            </div>
+            <div style="position: absolute; right: 0; top: 50%; transform: translateY(-50%); display: flex; align-items: center; gap: 11px; padding: 16px 12px; border-radius: 18px 0 0 18px; border: 1px solid rgba(147,0,255,0.35); border-right: none; background: rgba(21,15,51,0.72); backdrop-filter: blur(14px); box-shadow: -8px 0 30px rgba(0,0,0,0.42); writing-mode: vertical-rl;">
+              <span style="writing-mode: horizontal-tb; flex: none; width: 9px; height: 9px; border-radius: 2px; transform: rotate(45deg); background: {{ barColor }}; animation: tiePulse 2s ease-in-out infinite;"></span>
+              <span style="font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 12.5px; letter-spacing: 0.02em; max-height: 122px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: rgba(255,255,255,0.92);">{{ barName }}</span>
+              <span style="font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace; font-size: 12.5px; font-variant-numeric: tabular-nums; color: #ffaf00;">{{ barTime }}</span>
+              <button title="Stop" style="writing-mode: horizontal-tb; flex: none; width: 24px; height: 24px; border-radius: 999px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 1.5px solid rgba(255,93,143,0.5); background: rgba(255,93,143,0.16); color: #ff5d8f; transition: all 180ms ease;" style-hover="background: #ff5d8f; color: #ffffff;">
+                <svg width="8" height="8" viewBox="0 0 24 24" fill="currentColor"><rect x="5" y="5" width="14" height="14" rx="2.5"></rect></svg>
+              </button>
+            </div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 3px;">
+            <span style="font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 13px; color: #ffffff;">Full rail · 44 × 200</span>
+            <span style="font-size: 12.5px; line-height: 1.45; color: rgba(255,255,255,0.45);">Everything readable at a glance. Stop is always reachable.</span>
+          </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 11px;">
+          <div style="position: relative; width: 236px; height: 300px; border-radius: 16px; overflow: hidden; border: 1px solid rgba(147,0,255,0.22); background: radial-gradient(120% 90% at 20% 0%, #241a5c 0%, #150f33 60%, #0c0824 100%);">
+            <div style="position: absolute; inset: 0; background-image: linear-gradient(rgba(147,0,255,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(147,0,255,0.06) 1px, transparent 1px); background-size: 60px 60px;"></div>
+            <div style="position: absolute; left: 20px; top: 30px; right: 60px; display: flex; flex-direction: column; gap: 8px;">
+              <span style="height: 6px; border-radius: 999px; background: rgba(255,255,255,0.07); width: 88%;"></span>
+              <span style="height: 6px; border-radius: 999px; background: rgba(255,255,255,0.07); width: 64%;"></span>
+              <span style="height: 6px; border-radius: 999px; background: rgba(255,255,255,0.05); width: 78%;"></span>
+            </div>
+            <div style="position: absolute; right: 0; top: 50%; transform: translateY(-50%); display: flex; align-items: center; gap: 10px; padding: 14px 11px; border-radius: 16px 0 0 16px; border: 1px solid rgba(147,0,255,0.35); border-right: none; background: rgba(21,15,51,0.72); backdrop-filter: blur(14px); box-shadow: -8px 0 30px rgba(0,0,0,0.42); writing-mode: vertical-rl;">
+              <span style="writing-mode: horizontal-tb; flex: none; width: 9px; height: 9px; border-radius: 2px; transform: rotate(45deg); background: {{ barColor }}; animation: tiePulse 2s ease-in-out infinite;"></span>
+              <span style="font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace; font-size: 12.5px; font-variant-numeric: tabular-nums; color: #ffaf00;">{{ barTime }}</span>
+            </div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 3px;">
+            <span style="font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 13px; color: #ffffff;">Compact tab · 40 × 96</span>
+            <span style="font-size: 12.5px; line-height: 1.45; color: rgba(255,255,255,0.45);">Colour tells you which task, so the name is dropped. Hover grows it into the full rail.</span>
+          </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 11px;">
+          <div style="position: relative; width: 236px; height: 300px; border-radius: 16px; overflow: hidden; border: 1px solid rgba(147,0,255,0.22); background: radial-gradient(120% 90% at 20% 0%, #241a5c 0%, #150f33 60%, #0c0824 100%);">
+            <div style="position: absolute; inset: 0; background-image: linear-gradient(rgba(147,0,255,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(147,0,255,0.06) 1px, transparent 1px); background-size: 60px 60px;"></div>
+            <div style="position: absolute; left: 20px; top: 30px; right: 34px; display: flex; flex-direction: column; gap: 8px;">
+              <span style="height: 6px; border-radius: 999px; background: rgba(255,255,255,0.07); width: 88%;"></span>
+              <span style="height: 6px; border-radius: 999px; background: rgba(255,255,255,0.07); width: 64%;"></span>
+              <span style="height: 6px; border-radius: 999px; background: rgba(255,255,255,0.05); width: 78%;"></span>
+            </div>
+            <div style="position: absolute; right: 0; top: 50%; transform: translateY(-50%); width: 7px; height: 130px; border-radius: 7px 0 0 7px; background: linear-gradient(180deg, #4500ff, #9300ff, #b300ff, #ffaf00); box-shadow: -4px 0 22px rgba(147,0,255,0.5); animation: tiePulse 2.6s ease-in-out infinite;"></div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 3px;">
+            <span style="font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 13px; color: #ffffff;">Sliver · 7 × 130</span>
+            <span style="font-size: 12.5px; line-height: 1.45; color: rgba(255,255,255,0.45);">Now the resting state. When no task is tracking this is all that is left on screen, flat rather than pulsing, and clicking it brings the panel back.</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div id="2b" style="display: flex; flex-direction: column; gap: 16px;">
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <span style="display: inline-flex; align-items: center; justify-content: center; min-width: 34px; height: 24px; padding: 0 9px; border-radius: 999px; background: linear-gradient(135deg, #4500ff, #b300ff); font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 11px; letter-spacing: 0.12em; color: #ffffff;">2B</span>
+        <h3 style="margin: 0; font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 20px; color: #ffffff;">Horizontal bar</h3>
+        <span style="font-size: 13px; color: rgba(255,255,255,0.4);">for the top and bottom docks</span>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 16px;">
+
+        <div style="display: flex; flex-direction: column; gap: 11px;">
+          <div style="position: relative; width: 420px; height: 152px; border-radius: 16px; overflow: hidden; border: 1px solid rgba(147,0,255,0.22); background: radial-gradient(120% 120% at 80% 100%, #241a5c 0%, #150f33 60%, #0c0824 100%);">
+            <div style="position: absolute; inset: 0; background-image: linear-gradient(rgba(147,0,255,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(147,0,255,0.06) 1px, transparent 1px); background-size: 60px 60px;"></div>
+            <div style="position: absolute; left: 24px; right: 24px; bottom: 24px; display: flex; flex-direction: column; gap: 8px;">
+              <span style="height: 6px; border-radius: 999px; background: rgba(255,255,255,0.07); width: 72%;"></span>
+              <span style="height: 6px; border-radius: 999px; background: rgba(255,255,255,0.05); width: 44%;"></span>
+            </div>
+            <div style="position: absolute; top: 0; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 11px; padding: 11px 15px 13px; border-radius: 0 0 18px 18px; border: 1px solid rgba(147,0,255,0.35); border-top: none; background: rgba(21,15,51,0.72); backdrop-filter: blur(14px); box-shadow: 0 8px 30px rgba(0,0,0,0.42);">
+              <span style="flex: none; width: 9px; height: 9px; border-radius: 2px; transform: rotate(45deg); background: {{ barColor }}; animation: tiePulse 2s ease-in-out infinite;"></span>
+              <span style="font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 12.5px; white-space: nowrap; max-width: 150px; overflow: hidden; text-overflow: ellipsis; color: rgba(255,255,255,0.92);">{{ barName }}</span>
+              <span style="font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace; font-size: 12.5px; font-variant-numeric: tabular-nums; color: #ffaf00;">{{ barTime }}</span>
+              <button title="Stop" style="flex: none; width: 24px; height: 24px; border-radius: 999px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 1.5px solid rgba(255,93,143,0.5); background: rgba(255,93,143,0.16); color: #ff5d8f; transition: all 180ms ease;" style-hover="background: #ff5d8f; color: #ffffff;">
+                <svg width="8" height="8" viewBox="0 0 24 24" fill="currentColor"><rect x="5" y="5" width="14" height="14" rx="2.5"></rect></svg>
+              </button>
+            </div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 3px;">
+            <span style="font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 13px; color: #ffffff;">Full pill · 240 × 44 <span style="font-family: 'Roboto', sans-serif; font-weight: 400; color: #ffaf00;">— wired in now</span></span>
+            <span style="font-size: 12.5px; line-height: 1.45; color: rgba(255,255,255,0.45);">Squared off against the edge it hangs from, rounded on the free side.</span>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 16px; flex-wrap: wrap;">
+          <div style="display: flex; flex-direction: column; gap: 11px;">
+            <div style="position: relative; width: 202px; height: 128px; border-radius: 16px; overflow: hidden; border: 1px solid rgba(147,0,255,0.22); background: radial-gradient(120% 120% at 80% 100%, #241a5c 0%, #150f33 60%, #0c0824 100%);">
+              <div style="position: absolute; inset: 0; background-image: linear-gradient(rgba(147,0,255,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(147,0,255,0.06) 1px, transparent 1px); background-size: 60px 60px;"></div>
+              <div style="position: absolute; left: 20px; right: 20px; bottom: 20px; display: flex; flex-direction: column; gap: 8px;">
+                <span style="height: 6px; border-radius: 999px; background: rgba(255,255,255,0.07); width: 78%;"></span>
+                <span style="height: 6px; border-radius: 999px; background: rgba(255,255,255,0.05); width: 50%;"></span>
+              </div>
+              <div style="position: absolute; top: 0; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 9px; padding: 10px 13px 12px; border-radius: 0 0 16px 16px; border: 1px solid rgba(147,0,255,0.35); border-top: none; background: rgba(21,15,51,0.72); backdrop-filter: blur(14px); box-shadow: 0 8px 30px rgba(0,0,0,0.42);">
+                <span style="flex: none; width: 9px; height: 9px; border-radius: 2px; transform: rotate(45deg); background: {{ barColor }}; animation: tiePulse 2s ease-in-out infinite;"></span>
+                <span style="font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace; font-size: 12.5px; font-variant-numeric: tabular-nums; color: #ffaf00;">{{ barTime }}</span>
+              </div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 3px;">
+              <span style="font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 13px; color: #ffffff;">Compact · 96 × 40</span>
+              <span style="font-size: 12.5px; line-height: 1.45; color: rgba(255,255,255,0.45);">Just the clock and the colour.</span>
+            </div>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 11px;">
+            <div style="position: relative; width: 202px; height: 128px; border-radius: 16px; overflow: hidden; border: 1px solid rgba(147,0,255,0.22); background: radial-gradient(120% 120% at 80% 100%, #241a5c 0%, #150f33 60%, #0c0824 100%);">
+              <div style="position: absolute; inset: 0; background-image: linear-gradient(rgba(147,0,255,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(147,0,255,0.06) 1px, transparent 1px); background-size: 60px 60px;"></div>
+              <div style="position: absolute; left: 20px; right: 20px; bottom: 20px; display: flex; flex-direction: column; gap: 8px;">
+                <span style="height: 6px; border-radius: 999px; background: rgba(255,255,255,0.07); width: 78%;"></span>
+                <span style="height: 6px; border-radius: 999px; background: rgba(255,255,255,0.05); width: 50%;"></span>
+              </div>
+              <div style="position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 130px; height: 7px; border-radius: 0 0 7px 7px; background: linear-gradient(90deg, #4500ff, #9300ff, #b300ff, #ffaf00); box-shadow: 0 4px 22px rgba(147,0,255,0.5); animation: tiePulse 2.6s ease-in-out infinite;"></div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 3px;">
+              <span style="font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 13px; color: #ffffff;">Sliver · 130 × 7</span>
+              <span style="font-size: 12.5px; line-height: 1.45; color: rgba(255,255,255,0.45);">Reads as a status light, not a window. Same resting behaviour as 2a — click brings the panel back.</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<section style="display: flex; flex-direction: column; gap: 44px;">
+  <div style="display: flex; align-items: center; gap: 12px; margin-bottom: -12px;">
+    <span style="font-family: 'Space Grotesk', sans-serif; font-weight: 500; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255,255,255,0.35);">Turn 1 · The Two Docks</span>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 14px; max-width: 760px;">
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <img src="assets/logo-transparent.svg" alt="TIE" style="width: 22px; height: 22px; display: block;">
+      <span style="font-family: 'Space Grotesk', sans-serif; font-weight: 500; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.45);">TIE Timer · Desktop Widget</span>
+    </div>
+    <h1 style="margin: 0; font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 44px; line-height: 1.08; letter-spacing: -0.01em; color: #ffffff;">Track The Day Without Leaving Your Work</h1>
+    <p style="margin: 0; font-size: 17px; line-height: 1.55; color: rgba(255,255,255,0.7); text-wrap: pretty;">One task runs at a time. The total keeps time as long as something is tracking and pauses the moment you stop. Leave the panel alone and it slides off your chosen edge, leaving a translucent peek of whatever is still running.</p>
+    <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 4px;">
+      <span style="display: inline-flex; align-items: center; padding: 6px 14px; border-radius: 999px; border: 1px solid rgba(147,0,255,0.3); background: rgba(30,23,71,0.6); font-family: 'Space Grotesk', sans-serif; font-size: 12px; letter-spacing: 0.06em; color: rgba(255,255,255,0.75);">Tauri v2 · Windows &amp; macOS</span>
+      <span style="display: inline-flex; align-items: center; padding: 6px 14px; border-radius: 999px; border: 1px solid rgba(147,0,255,0.3); background: rgba(30,23,71,0.6); font-family: 'Space Grotesk', sans-serif; font-size: 12px; letter-spacing: 0.06em; color: rgba(255,255,255,0.75);">Always on top</span>
+      <span style="display: inline-flex; align-items: center; padding: 6px 14px; border-radius: 999px; border: 1px solid rgba(147,0,255,0.3); background: rgba(30,23,71,0.6); font-family: 'Space Grotesk', sans-serif; font-size: 12px; letter-spacing: 0.06em; color: rgba(255,255,255,0.75);">Resets at midnight, keeps history</span>
+    </div>
+    <p style="margin: 6px 0 0; font-size: 14px; line-height: 1.6; color: rgba(255,255,255,0.45);">Both panels below are live. Type task names, start and stop them, tick them off, expand a row for its colour and note, and switch the dock edge. Three resting states: the panel while you use it, a peek while a task runs, and a bare sliver when nothing does — stop the running task, then press Idle peek. <a href="#1a">1a</a> is the vertical dock, <a href="#1b">1b</a> the horizontal bar.</p>
+  </div>
+
+  <div style="display: flex; flex-wrap: wrap; gap: 44px; align-items: flex-start;">
+
+    <div id="1a" style="display: flex; flex-direction: column; gap: 16px;">
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <span style="display: inline-flex; align-items: center; justify-content: center; min-width: 34px; height: 24px; padding: 0 9px; border-radius: 999px; background: linear-gradient(135deg, #4500ff, #b300ff); font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 11px; letter-spacing: 0.12em; color: #ffffff;">1A</span>
+        <h2 style="margin: 0; font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 22px; color: #ffffff;">Vertical dock</h2>
+        <span style="font-size: 13px; color: rgba(255,255,255,0.4);">286 × full height</span>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 18px; flex-wrap: wrap;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="font-family: 'Space Grotesk', sans-serif; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255,255,255,0.32);">State</span>
+          <button onClick="{{ vWake }}" style="padding: 7px 15px; border-radius: 999px; border: 1px solid rgba(147,0,255,0.35); cursor: pointer; font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 12px; transition: all 180ms ease; background: {{ vChipActiveBg }}; color: {{ vChipActiveFg }};">Active</button>
+          <button onClick="{{ vSleep }}" style="padding: 7px 15px; border-radius: 999px; border: 1px solid rgba(147,0,255,0.35); cursor: pointer; font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 12px; transition: all 180ms ease; background: {{ vChipIdleBg }}; color: {{ vChipIdleFg }};">Idle peek</button>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="font-family: 'Space Grotesk', sans-serif; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255,255,255,0.32);">Edge</span>
+          <button onClick="{{ vEdgeLeft }}" style="padding: 7px 15px; border-radius: 999px; border: 1px solid rgba(147,0,255,0.35); cursor: pointer; font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 12px; transition: all 180ms ease; background: {{ vChipLeftBg }}; color: {{ vChipLeftFg }};">Left</button>
+          <button onClick="{{ vEdgeRight }}" style="padding: 7px 15px; border-radius: 999px; border: 1px solid rgba(147,0,255,0.35); cursor: pointer; font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 12px; transition: all 180ms ease; background: {{ vChipRightBg }}; color: {{ vChipRightFg }};">Right</button>
+        </div>
+      </div>
+
+      <div style="position: relative; width: 580px; height: 720px; border-radius: 18px; overflow: hidden; border: 1px solid rgba(147,0,255,0.22); background: radial-gradient(120% 90% at 20% 0%, #241a5c 0%, #150f33 55%, #0c0824 100%); box-shadow: 0 24px 60px rgba(0,0,0,0.45);">
+        <div style="position: absolute; inset: 0; background-image: linear-gradient(rgba(147,0,255,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(147,0,255,0.06) 1px, transparent 1px); background-size: 60px 60px; animation: tieDrift 16s linear infinite;"></div>
+        <div style="position: absolute; left: 40px; top: 72px; width: 300px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.06); background: rgba(12,8,36,0.5); padding: 14px; box-sizing: border-box; display: flex; flex-direction: column; gap: 13px;">
+          <div style="display: flex; gap: 6px;">
+            <span style="width: 8px; height: 8px; border-radius: 999px; background: rgba(255,255,255,0.13);"></span>
+            <span style="width: 8px; height: 8px; border-radius: 999px; background: rgba(255,255,255,0.13);"></span>
+            <span style="width: 8px; height: 8px; border-radius: 999px; background: rgba(255,255,255,0.13);"></span>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 9px;">
+            <span style="height: 7px; border-radius: 999px; background: rgba(255,255,255,0.07); width: 92%;"></span>
+            <span style="height: 7px; border-radius: 999px; background: rgba(255,255,255,0.07); width: 74%;"></span>
+            <span style="height: 7px; border-radius: 999px; background: rgba(255,255,255,0.07); width: 84%;"></span>
+            <span style="height: 7px; border-radius: 999px; background: rgba(255,255,255,0.05); width: 46%;"></span>
+          </div>
+        </div>
+
+        <div style="position: absolute; inset: 14px; display: flex; align-items: stretch; pointer-events: none; justify-content: {{ vJustify }};">
+          <div onMouseEnter="{{ vWake }}" onMouseMove="{{ vWake }}" onMouseDown="{{ vWake }}" style="pointer-events: auto; width: 286px; box-sizing: border-box; border-radius: 24px; border: 1px solid rgba(147,0,255,0.32); background: linear-gradient(160deg, rgba(30,23,71,0.94), rgba(21,15,51,0.97)); backdrop-filter: blur(20px); box-shadow: 0 24px 60px rgba(0,0,0,0.5), 0 0 44px rgba(147,0,255,0.16); padding: 18px; display: flex; flex-direction: column; gap: 14px; transition: transform 460ms cubic-bezier(0.16,1,0.3,1), opacity 300ms ease; transform: {{ vPanelT }}; opacity: {{ vPanelOp }};">
+
+            <div style="display: flex; align-items: center; gap: 9px;">
+              <img src="assets/logo-transparent.svg" alt="" style="width: 17px; height: 17px; display: block;">
+              <span style="font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255,255,255,0.55);">TIE Timer</span>
+              <span style="flex: 1;"></span>
+              <span style="width: 7px; height: 7px; border-radius: 999px; background: {{ vDotColor }}; animation: {{ vDotAnim }};"></span>
+              <span style="font-family: 'Space Grotesk', sans-serif; font-size: 9.5px; letter-spacing: 0.13em; text-transform: uppercase; color: rgba(255,255,255,0.45);">{{ vDotLabel }}</span>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 5px; padding: 15px 16px 16px; border-radius: 16px; background: rgba(12,8,36,0.55); border: 1px solid rgba(147,0,255,0.18);">
+              <span style="font-family: 'Space Grotesk', sans-serif; font-size: 9.5px; letter-spacing: 0.15em; text-transform: uppercase; color: rgba(255,255,255,0.38);">Total today</span>
+              <span style="font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace; font-size: 33px; font-weight: 500; letter-spacing: -0.025em; font-variant-numeric: tabular-nums; line-height: 1.1; color: {{ vGenColor }};">{{ vGeneral }}</span>
+              <div style="height: 2px; margin-top: 8px; border-radius: 999px; overflow: hidden; background: rgba(147,0,255,0.14);">
+                <div style="height: 100%; width: 100%; background: linear-gradient(90deg, #150088, #4500ff, #9300ff, #b300ff, #ffaf00); transition: opacity 300ms ease; opacity: {{ vGenBarOp }};"></div>
+              </div>
+            </div>
+
+            <div style="display: flex; align-items: baseline; gap: 8px; padding: 0 3px;">
+              <span style="font-family: 'Space Grotesk', sans-serif; font-size: 9.5px; letter-spacing: 0.15em; text-transform: uppercase; color: rgba(255,255,255,0.38);">Tasks</span>
+              <span style="font-family: 'Space Grotesk', sans-serif; font-size: 9.5px; letter-spacing: 0.06em; color: rgba(255,255,255,0.25);">{{ vCount }}</span>
+            </div>
+
+            <div style="flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding-right: 3px;">
+              <sc-for list="{{ vTasks }}" as="t" hint-placeholder-count="4">
+                <div style="position: relative; flex: none; overflow: hidden; border-radius: 14px; padding: 11px 12px; display: flex; flex-direction: column; gap: 9px; transition: background 300ms ease, border-color 300ms ease; background: {{ t.rowBg }}; border: 1px solid {{ t.rowBorder }};">
+                  <div style="display: flex; align-items: center; gap: 9px;">
+                    <button onClick="{{ t.onDone }}" title="Mark done" style="flex: none; width: 17px; height: 17px; border-radius: 5px; display: flex; align-items: center; justify-content: center; padding: 0; cursor: pointer; transition: all 180ms ease; background: {{ t.checkBg }}; border: 1.5px solid {{ t.checkBorder }};" style-hover="transform: scale(1.14);">
+                      <sc-if value="{{ t.done }}" hint-placeholder-val="{{ false }}">
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#0c0824" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"></path></svg>
+                      </sc-if>
+                    </button>
+                    <input value="{{ t.name }}" onChange="{{ t.onName }}" placeholder="Name this task" spellcheck="false" style="flex: 1; min-width: 0; background: transparent; border: none; outline: none; padding: 0; font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 13.5px; color: #ffffff; text-decoration: {{ t.strike }}; opacity: {{ t.dim }};">
+                    <button onClick="{{ t.onExpand }}" title="Colour and note" style="flex: none; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; border: none; border-radius: 6px; background: transparent; cursor: pointer; transition: color 180ms ease, transform 300ms cubic-bezier(0.16,1,0.3,1); color: {{ t.chevColor }}; transform: {{ t.chevRot }};" style-hover="color: #ffaf00;">
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"></path></svg>
+                    </button>
+                  </div>
+                  <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace; font-size: 15px; font-variant-numeric: tabular-nums; letter-spacing: -0.01em; transition: color 300ms ease; color: {{ t.timeColor }};">{{ t.time }}</span>
+                    <span style="flex: 1;"></span>
+                    <button onClick="{{ t.onRemove }}" title="Remove task" style="width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; border: none; border-radius: 999px; background: transparent; cursor: pointer; color: rgba(255,255,255,0.2); transition: color 180ms ease;" style-hover="color: #ff5d8f;">
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"></path></svg>
+                    </button>
+                    <button onClick="{{ t.onToggle }}" style="width: 32px; height: 32px; border-radius: 999px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 180ms ease, box-shadow 300ms ease, background 300ms ease; color: #ffffff; background: {{ t.btnBg }}; border: 1.5px solid {{ t.btnBorder }}; box-shadow: {{ t.btnGlow }};" style-hover="transform: translateY(-2px);">
+                      <sc-if value="{{ t.running }}" hint-placeholder-val="{{ false }}">
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><rect x="5" y="5" width="14" height="14" rx="2.5"></rect></svg>
+                      </sc-if>
+                      <sc-if value="{{ t.idle }}" hint-placeholder-val="{{ true }}">
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5l13 7.5-13 7.5z"></path></svg>
+                      </sc-if>
+                    </button>
+                  </div>
+                  <sc-if value="{{ t.expanded }}" hint-placeholder-val="{{ false }}">
+                    <div style="display: flex; flex-direction: column; gap: 9px; padding-top: 9px; border-top: 1px dashed rgba(147,0,255,0.22);">
+                      <div style="display: flex; gap: 7px;">
+                        <sc-for list="{{ t.swatches }}" as="s" hint-placeholder-count="6">
+                          <button onClick="{{ s.onPick }}" title="{{ s.color }}" style="width: 20px; height: 20px; border-radius: 999px; cursor: pointer; padding: 0; transition: transform 180ms ease; background: {{ s.color }}; border: 2px solid {{ s.ring }};" style-hover="transform: scale(1.15);"></button>
+                        </sc-for>
+                      </div>
+                      <input value="{{ t.note }}" onChange="{{ t.onNote }}" placeholder="Add a note" style="width: 100%; box-sizing: border-box; background: rgba(12,8,36,0.6); border: 1px solid rgba(147,0,255,0.25); border-radius: 10px; padding: 8px 11px; font-family: 'Roboto', sans-serif; font-size: 12.5px; color: #ffffff; outline: none;" style-focus="border-color: #9300ff; box-shadow: 0 0 0 3px rgba(147,0,255,0.18);">
+                      <div style="display: flex; flex-direction: column; gap: 6px;">
+                        <sc-for list="{{ t.items }}" as="i" hint-placeholder-count="2">
+                          <div style="display: flex; align-items: center; gap: 8px;">
+                            <button onClick="{{ i.onToggle }}" title="Tick off" style="flex: none; width: 14px; height: 14px; border-radius: 4px; display: flex; align-items: center; justify-content: center; padding: 0; cursor: pointer; transition: all 180ms ease; background: {{ i.checkBg }}; border: 1.5px solid rgba(147,0,255,0.5);" style-hover="transform: scale(1.16);">
+                              <sc-if value="{{ i.done }}" hint-placeholder-val="{{ false }}">
+                                <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="#0c0824" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"></path></svg>
+                              </sc-if>
+                            </button>
+                            <input value="{{ i.text }}" onChange="{{ i.onText }}" spellcheck="false" style="flex: 1; min-width: 0; background: transparent; border: none; outline: none; padding: 0; font-family: 'Roboto', sans-serif; font-size: 12px; color: rgba(255,255,255,0.86); text-decoration: {{ i.strike }}; opacity: {{ i.dim }};">
+                            <button onClick="{{ i.onRemove }}" title="Remove step" style="flex: none; width: 14px; height: 14px; display: flex; align-items: center; justify-content: center; border: none; background: transparent; cursor: pointer; color: rgba(255,255,255,0.2); transition: color 180ms ease;" style-hover="color: #ff5d8f;">
+                              <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"></path></svg>
+                            </button>
+                          </div>
+                        </sc-for>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                          <span style="flex: none; width: 14px; height: 14px; border-radius: 4px; border: 1.5px dashed rgba(147,0,255,0.4);"></span>
+                          <input onKeyDown="{{ t.onAddItem }}" placeholder="Add a step, press Enter" style="flex: 1; min-width: 0; background: transparent; border: none; outline: none; padding: 0; font-family: 'Roboto', sans-serif; font-size: 12px; color: #ffffff;">
+                        </div>
+                      </div>
+                    </div>
+                  </sc-if>
+                  <sc-if value="{{ t.noteOnly }}" hint-placeholder-val="{{ false }}">
+                    <span style="font-size: 11.5px; line-height: 1.4; color: rgba(255,255,255,0.4); padding-left: 26px; margin-top: -3px;">{{ t.note }}</span>
+                  </sc-if>
+                  <sc-if value="{{ t.listOnly }}" hint-placeholder-val="{{ false }}">
+                    <div style="display: flex; align-items: center; gap: 8px; padding-left: 26px; margin-top: -3px;">
+                      <div style="flex: none; width: 66px; height: 3px; border-radius: 999px; overflow: hidden; background: rgba(12,8,36,0.75);">
+                        <div style="height: 100%; border-radius: 999px; transition: width 300ms ease; width: {{ t.itemPct }}; background: {{ t.color }};"></div>
+                      </div>
+                      <span style="font-family: ui-monospace, monospace; font-size: 10.5px; font-variant-numeric: tabular-nums; color: rgba(255,255,255,0.42);">{{ t.itemCount }} steps</span>
+                    </div>
+                  </sc-if>
+                  <sc-if value="{{ t.running }}" hint-placeholder-val="{{ false }}">
+                    <div style="position: absolute; left: 0; right: 0; bottom: 0; height: 2px; overflow: hidden; background: rgba(147,0,255,0.18);">
+                      <div style="height: 100%; width: 38%; background: linear-gradient(90deg, transparent, #b300ff, #ffaf00, transparent); animation: tieSweep 2.6s cubic-bezier(0.22,0.61,0.36,1) infinite;"></div>
+                    </div>
+                  </sc-if>
+                </div>
+              </sc-for>
+            </div>
+
+            <button onClick="{{ vAdd }}" style="flex: none; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 11px 18px; border-radius: 999px; border: 1.5px dashed rgba(147,0,255,0.4); background: transparent; cursor: pointer; font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 13px; color: rgba(255,255,255,0.72); transition: all 300ms cubic-bezier(0.22,0.61,0.36,1);" style-hover="background: rgba(147,0,255,0.12); border-color: #9300ff; color: #ffffff; transform: translateY(-2px);">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>
+              Add a Task
+            </button>
+
+            <div style="flex: none; display: flex; align-items: center; gap: 8px; padding-top: 12px; border-top: 1px solid rgba(147,0,255,0.16);">
+              <span style="font-family: 'Space Grotesk', sans-serif; font-size: 9.5px; letter-spacing: 0.13em; text-transform: uppercase; color: rgba(255,255,255,0.32);">Yesterday</span>
+              <span style="flex: 1;"></span>
+              <span style="font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace; font-size: 12px; font-variant-numeric: tabular-nums; color: rgba(255,255,255,0.5);">6:12:04</span>
+              <button onClick="{{ vOpenUsage }}" style="padding: 0; border: none; background: transparent; cursor: pointer; font-family: 'Space Grotesk', sans-serif; font-size: 11px; font-weight: 600; color: #ffaf00; transition: color 180ms ease;" style-hover="color: #b300ff;">Usage</button>
+            </div>
+          </div>
+        </div>
+
+        <div style="position: absolute; inset: 0; display: flex; align-items: flex-start; padding-top: 96px; pointer-events: none; justify-content: {{ vJustify }};">
+          <div onClick="{{ vWake }}" style="pointer-events: {{ vPeekPe }}; display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 999px; border: 1px solid rgba(147,0,255,0.35); background: rgba(21,15,51,0.72); backdrop-filter: blur(14px); box-shadow: 0 10px 34px rgba(0,0,0,0.45); cursor: pointer; transition: transform 460ms cubic-bezier(0.16,1,0.3,1), opacity 300ms ease; transform: {{ vPeekT }}; opacity: {{ vPeekOp }};" style-hover="opacity: 1;">
+            <span style="flex: none; width: 8px; height: 8px; border-radius: 2px; transform: rotate(45deg); background: {{ vPeekColor }}; animation: tiePulse 2s ease-in-out infinite;"></span>
+            <span style="font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 12.5px; white-space: nowrap; max-width: 128px; overflow: hidden; text-overflow: ellipsis; color: rgba(255,255,255,0.92);">{{ vPeekName }}</span>
+            <span style="font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace; font-size: 12.5px; font-variant-numeric: tabular-nums; color: #ffaf00;">{{ vPeekTime }}</span>
+            <button onClick="{{ vPeekStop }}" title="Stop" style="flex: none; width: 24px; height: 24px; border-radius: 999px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 1.5px solid rgba(255,93,143,0.5); background: rgba(255,93,143,0.16); color: #ff5d8f; transition: all 180ms ease;" style-hover="background: #ff5d8f; color: #ffffff;">
+              <svg width="8" height="8" viewBox="0 0 24 24" fill="currentColor"><rect x="5" y="5" width="14" height="14" rx="2.5"></rect></svg>
+            </button>
+          </div>
+        </div>
+
+        <div style="position: absolute; inset: 0; display: flex; align-items: center; pointer-events: none; justify-content: {{ vJustify }};">
+          <div onClick="{{ vWake }}" title="Nothing tracking · click to open" style="width: 7px; height: 130px; cursor: pointer; background: linear-gradient(180deg, #4500ff, #9300ff, #b300ff, #ffaf00); box-shadow: 0 0 22px rgba(147,0,255,0.45); transition: opacity 300ms ease, transform 460ms cubic-bezier(0.16,1,0.3,1), width 180ms ease; pointer-events: {{ vRestPe }}; opacity: {{ vRestOp }}; transform: {{ vRestT }}; border-radius: {{ vRestRadius }};" style-hover="width: 13px; opacity: 1;"></div>
+        </div>
+
+        <sc-if value="{{ vUsageOpen }}" hint-placeholder-val="{{ false }}">
+          <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(12,8,36,0.55); backdrop-filter: blur(3px);">
+            <div style="width: 296px; box-sizing: border-box; border-radius: 20px; border: 1px solid rgba(147,0,255,0.4); background: linear-gradient(160deg, rgba(30,23,71,0.97), rgba(21,15,51,0.98)); box-shadow: 0 20px 60px rgba(0,0,0,0.55), 0 0 44px rgba(147,0,255,0.2); padding: 18px; display: flex; flex-direction: column; gap: 14px;">
+              <div style="display: flex; align-items: center; gap: 9px;">
+                <span style="font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255,255,255,0.55);">This Week</span>
+                <span style="flex: 1;"></span>
+                <button onClick="{{ vCloseUsage }}" title="Close" style="width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; border: none; background: transparent; cursor: pointer; color: rgba(255,255,255,0.3); transition: color 180ms ease;" style-hover="color: #ff5d8f;">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"></path></svg>
+                </button>
+              </div>
+              <span style="font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace; font-size: 30px; font-weight: 500; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; line-height: 1; color: #ffffff;">{{ wkTotal }}</span>
+              <div style="display: flex; flex-direction: column; gap: 10px;">
+                <sc-for list="{{ wkTop3 }}" as="w" hint-placeholder-count="3">
+                  <div style="display: flex; flex-direction: column; gap: 6px;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                      <span style="flex: none; width: 8px; height: 8px; border-radius: 2px; transform: rotate(45deg); background: {{ w.color }};"></span>
+                      <span style="flex: 1; min-width: 0; font-family: 'Space Grotesk', sans-serif; font-weight: 500; font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: rgba(255,255,255,0.86);">{{ w.name }}</span>
+                      <span style="font-family: ui-monospace, monospace; font-size: 12px; font-variant-numeric: tabular-nums; color: rgba(255,255,255,0.6);">{{ w.hours }}</span>
+                    </div>
+                    <div style="height: 5px; border-radius: 999px; overflow: hidden; background: rgba(12,8,36,0.7);">
+                      <div style="height: 100%; border-radius: 999px; width: {{ w.barW }}; background: {{ w.color }};"></div>
+                    </div>
+                  </div>
+                </sc-for>
+              </div>
+              <a href="#3b" style="display: flex; align-items: center; justify-content: center; gap: 7px; padding: 10px 14px; border-radius: 999px; border: 1px solid rgba(147,0,255,0.4); font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 12.5px; transition: all 300ms cubic-bezier(0.22,0.61,0.36,1);" style-hover="background: rgba(147,0,255,0.12); border-color: #9300ff;">Open Full Review
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"></path></svg>
+              </a>
+            </div>
+          </div>
+        </sc-if>
+      </div>
+    </div>
+
+    <div id="1b" style="display: flex; flex-direction: column; gap: 16px;">
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <span style="display: inline-flex; align-items: center; justify-content: center; min-width: 34px; height: 24px; padding: 0 9px; border-radius: 999px; background: linear-gradient(135deg, #4500ff, #b300ff); font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 11px; letter-spacing: 0.12em; color: #ffffff;">1B</span>
+        <h2 style="margin: 0; font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 22px; color: #ffffff;">Horizontal bar</h2>
+        <span style="font-size: 13px; color: rgba(255,255,255,0.4);">full width × 148</span>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 18px; flex-wrap: wrap;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="font-family: 'Space Grotesk', sans-serif; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255,255,255,0.32);">State</span>
+          <button onClick="{{ hWake }}" style="padding: 7px 15px; border-radius: 999px; border: 1px solid rgba(147,0,255,0.35); cursor: pointer; font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 12px; transition: all 180ms ease; background: {{ hChipActiveBg }}; color: {{ hChipActiveFg }};">Active</button>
+          <button onClick="{{ hSleep }}" style="padding: 7px 15px; border-radius: 999px; border: 1px solid rgba(147,0,255,0.35); cursor: pointer; font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 12px; transition: all 180ms ease; background: {{ hChipIdleBg }}; color: {{ hChipIdleFg }};">Idle peek</button>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="font-family: 'Space Grotesk', sans-serif; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255,255,255,0.32);">Edge</span>
+          <button onClick="{{ hEdgeTop }}" style="padding: 7px 15px; border-radius: 999px; border: 1px solid rgba(147,0,255,0.35); cursor: pointer; font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 12px; transition: all 180ms ease; background: {{ hChipTopBg }}; color: {{ hChipTopFg }};">Top</button>
+          <button onClick="{{ hEdgeBottom }}" style="padding: 7px 15px; border-radius: 999px; border: 1px solid rgba(147,0,255,0.35); cursor: pointer; font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 12px; transition: all 180ms ease; background: {{ hChipBottomBg }}; color: {{ hChipBottomFg }};">Bottom</button>
+        </div>
+      </div>
+
+      <div style="position: relative; width: 860px; height: 720px; border-radius: 18px; overflow: hidden; border: 1px solid rgba(147,0,255,0.22); background: radial-gradient(120% 90% at 80% 0%, #241a5c 0%, #150f33 55%, #0c0824 100%); box-shadow: 0 24px 60px rgba(0,0,0,0.45);">
+        <div style="position: absolute; inset: 0; background-image: linear-gradient(rgba(147,0,255,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(147,0,255,0.06) 1px, transparent 1px); background-size: 60px 60px; animation: tieDrift 16s linear infinite;"></div>
+        <div style="position: absolute; left: 48px; top: 220px; width: 420px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.06); background: rgba(12,8,36,0.5); padding: 16px; box-sizing: border-box; display: flex; flex-direction: column; gap: 13px;">
+          <div style="display: flex; gap: 6px;">
+            <span style="width: 8px; height: 8px; border-radius: 999px; background: rgba(255,255,255,0.13);"></span>
+            <span style="width: 8px; height: 8px; border-radius: 999px; background: rgba(255,255,255,0.13);"></span>
+            <span style="width: 8px; height: 8px; border-radius: 999px; background: rgba(255,255,255,0.13);"></span>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 10px;">
+            <span style="height: 7px; border-radius: 999px; background: rgba(255,255,255,0.07); width: 88%;"></span>
+            <span style="height: 7px; border-radius: 999px; background: rgba(255,255,255,0.07); width: 96%;"></span>
+            <span style="height: 7px; border-radius: 999px; background: rgba(255,255,255,0.07); width: 70%;"></span>
+            <span style="height: 7px; border-radius: 999px; background: rgba(255,255,255,0.05); width: 42%;"></span>
+          </div>
+        </div>
+
+        <div style="position: absolute; inset: 14px; display: flex; justify-content: center; pointer-events: none; align-items: {{ hAlign }};">
+          <div onMouseEnter="{{ hWake }}" onMouseMove="{{ hWake }}" onMouseDown="{{ hWake }}" style="pointer-events: auto; width: 100%; box-sizing: border-box; border-radius: 24px; border: 1px solid rgba(147,0,255,0.32); background: linear-gradient(120deg, rgba(30,23,71,0.94), rgba(21,15,51,0.97)); backdrop-filter: blur(20px); box-shadow: 0 24px 60px rgba(0,0,0,0.5), 0 0 44px rgba(147,0,255,0.16); padding: 16px 18px; display: flex; align-items: stretch; gap: 16px; transition: transform 460ms cubic-bezier(0.16,1,0.3,1), opacity 300ms ease; transform: {{ hPanelT }}; opacity: {{ hPanelOp }};">
+
+            <div style="flex: none; width: 178px; display: flex; flex-direction: column; gap: 7px; padding-right: 16px; border-right: 1px solid rgba(147,0,255,0.2);">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <img src="assets/logo-transparent.svg" alt="" style="width: 15px; height: 15px; display: block;">
+                <span style="font-family: 'Space Grotesk', sans-serif; font-size: 9.5px; letter-spacing: 0.15em; text-transform: uppercase; color: rgba(255,255,255,0.4);">Total today</span>
+              </div>
+              <span style="font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace; font-size: 31px; font-weight: 500; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; line-height: 1.1; color: {{ hGenColor }};">{{ hGeneral }}</span>
+              <div style="height: 2px; border-radius: 999px; overflow: hidden; background: rgba(147,0,255,0.14);">
+                <div style="height: 100%; width: 100%; background: linear-gradient(90deg, #150088, #4500ff, #9300ff, #b300ff, #ffaf00); transition: opacity 300ms ease; opacity: {{ hGenBarOp }};"></div>
+              </div>
+              <div style="display: flex; align-items: center; gap: 7px; margin-top: 4px;">
+                <span style="width: 6px; height: 6px; border-radius: 999px; background: {{ hDotColor }}; animation: {{ hDotAnim }};"></span>
+                <span style="font-family: 'Space Grotesk', sans-serif; font-size: 9.5px; letter-spacing: 0.13em; text-transform: uppercase; color: rgba(255,255,255,0.45);">{{ hDotLabel }}</span>
+                <span style="flex: 1;"></span>
+                <button onClick="{{ hOpenUsage }}" style="padding: 0; border: none; background: transparent; cursor: pointer; font-family: 'Space Grotesk', sans-serif; font-size: 10px; font-weight: 600; letter-spacing: 0.06em; color: #ffaf00; transition: color 180ms ease;" style-hover="color: #b300ff;">Usage</button>
+              </div>
+            </div>
+
+            <div style="flex: 1; min-width: 0; overflow-x: auto; display: flex; align-items: stretch; gap: 10px; padding-bottom: 2px;">
+              <sc-for list="{{ hTasks }}" as="t" hint-placeholder-count="4">
+                <div style="position: relative; overflow: hidden; flex: none; width: 218px; box-sizing: border-box; border-radius: 14px; padding: 11px 12px; display: flex; flex-direction: column; gap: 8px; transition: background 300ms ease, border-color 300ms ease; background: {{ t.rowBg }}; border: 1px solid {{ t.rowBorder }};">
+                  <div style="display: flex; align-items: center; gap: 8px;">
+                    <button onClick="{{ t.onDone }}" title="Mark done" style="flex: none; width: 17px; height: 17px; border-radius: 5px; display: flex; align-items: center; justify-content: center; padding: 0; cursor: pointer; transition: all 180ms ease; background: {{ t.checkBg }}; border: 1.5px solid {{ t.checkBorder }};" style-hover="transform: scale(1.14);">
+                      <sc-if value="{{ t.done }}" hint-placeholder-val="{{ false }}">
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#0c0824" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"></path></svg>
+                      </sc-if>
+                    </button>
+                    <input value="{{ t.name }}" onChange="{{ t.onName }}" placeholder="Name this task" spellcheck="false" style="flex: 1; min-width: 0; background: transparent; border: none; outline: none; padding: 0; font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 13px; color: #ffffff; text-decoration: {{ t.strike }}; opacity: {{ t.dim }};">
+                    <button onClick="{{ t.onExpand }}" title="Colour and note" style="flex: none; width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; border: none; border-radius: 6px; background: transparent; cursor: pointer; transition: color 180ms ease, transform 300ms cubic-bezier(0.16,1,0.3,1); color: {{ t.chevColor }}; transform: {{ t.chevRot }};" style-hover="color: #ffaf00;">
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"></path></svg>
+                    </button>
+                  </div>
+                  <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace; font-size: 14.5px; font-variant-numeric: tabular-nums; letter-spacing: -0.01em; transition: color 300ms ease; color: {{ t.timeColor }};">{{ t.time }}</span>
+                    <span style="flex: 1;"></span>
+                    <button onClick="{{ t.onRemove }}" title="Remove task" style="width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; border: none; border-radius: 999px; background: transparent; cursor: pointer; color: rgba(255,255,255,0.2); transition: color 180ms ease;" style-hover="color: #ff5d8f;">
+                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"></path></svg>
+                    </button>
+                    <button onClick="{{ t.onToggle }}" style="width: 30px; height: 30px; border-radius: 999px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 180ms ease, box-shadow 300ms ease, background 300ms ease; color: #ffffff; background: {{ t.btnBg }}; border: 1.5px solid {{ t.btnBorder }}; box-shadow: {{ t.btnGlow }};" style-hover="transform: translateY(-2px);">
+                      <sc-if value="{{ t.running }}" hint-placeholder-val="{{ false }}">
+                        <svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor"><rect x="5" y="5" width="14" height="14" rx="2.5"></rect></svg>
+                      </sc-if>
+                      <sc-if value="{{ t.idle }}" hint-placeholder-val="{{ true }}">
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5l13 7.5-13 7.5z"></path></svg>
+                      </sc-if>
+                    </button>
+                  </div>
+                  <sc-if value="{{ t.expanded }}" hint-placeholder-val="{{ false }}">
+                    <div style="display: flex; flex-direction: column; gap: 8px; padding-top: 8px; border-top: 1px dashed rgba(147,0,255,0.22);">
+                      <div style="display: flex; gap: 6px;">
+                        <sc-for list="{{ t.swatches }}" as="s" hint-placeholder-count="6">
+                          <button onClick="{{ s.onPick }}" title="{{ s.color }}" style="width: 17px; height: 17px; border-radius: 999px; cursor: pointer; padding: 0; transition: transform 180ms ease; background: {{ s.color }}; border: 2px solid {{ s.ring }};" style-hover="transform: scale(1.15);"></button>
+                        </sc-for>
+                      </div>
+                      <input value="{{ t.note }}" onChange="{{ t.onNote }}" placeholder="Add a note" style="width: 100%; box-sizing: border-box; background: rgba(12,8,36,0.6); border: 1px solid rgba(147,0,255,0.25); border-radius: 10px; padding: 7px 10px; font-family: 'Roboto', sans-serif; font-size: 12px; color: #ffffff; outline: none;" style-focus="border-color: #9300ff; box-shadow: 0 0 0 3px rgba(147,0,255,0.18);">
+                      <div style="display: flex; flex-direction: column; gap: 6px;">
+                        <sc-for list="{{ t.items }}" as="i" hint-placeholder-count="2">
+                          <div style="display: flex; align-items: center; gap: 7px;">
+                            <button onClick="{{ i.onToggle }}" title="Tick off" style="flex: none; width: 14px; height: 14px; border-radius: 4px; display: flex; align-items: center; justify-content: center; padding: 0; cursor: pointer; transition: all 180ms ease; background: {{ i.checkBg }}; border: 1.5px solid rgba(147,0,255,0.5);" style-hover="transform: scale(1.16);">
+                              <sc-if value="{{ i.done }}" hint-placeholder-val="{{ false }}">
+                                <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="#0c0824" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"></path></svg>
+                              </sc-if>
+                            </button>
+                            <input value="{{ i.text }}" onChange="{{ i.onText }}" spellcheck="false" style="flex: 1; min-width: 0; background: transparent; border: none; outline: none; padding: 0; font-family: 'Roboto', sans-serif; font-size: 11.5px; color: rgba(255,255,255,0.86); text-decoration: {{ i.strike }}; opacity: {{ i.dim }};">
+                            <button onClick="{{ i.onRemove }}" title="Remove step" style="flex: none; width: 14px; height: 14px; display: flex; align-items: center; justify-content: center; border: none; background: transparent; cursor: pointer; color: rgba(255,255,255,0.2); transition: color 180ms ease;" style-hover="color: #ff5d8f;">
+                              <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"></path></svg>
+                            </button>
+                          </div>
+                        </sc-for>
+                        <div style="display: flex; align-items: center; gap: 7px;">
+                          <span style="flex: none; width: 14px; height: 14px; border-radius: 4px; border: 1.5px dashed rgba(147,0,255,0.4);"></span>
+                          <input onKeyDown="{{ t.onAddItem }}" placeholder="Add a step" style="flex: 1; min-width: 0; background: transparent; border: none; outline: none; padding: 0; font-family: 'Roboto', sans-serif; font-size: 11.5px; color: #ffffff;">
+                        </div>
+                      </div>
+                    </div>
+                  </sc-if>
+                  <sc-if value="{{ t.noteOnly }}" hint-placeholder-val="{{ false }}">
+                    <span style="font-size: 11px; line-height: 1.35; color: rgba(255,255,255,0.4); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ t.note }}</span>
+                  </sc-if>
+                  <sc-if value="{{ t.listOnly }}" hint-placeholder-val="{{ false }}">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                      <div style="flex: none; width: 66px; height: 3px; border-radius: 999px; overflow: hidden; background: rgba(12,8,36,0.75);">
+                        <div style="height: 100%; border-radius: 999px; transition: width 300ms ease; width: {{ t.itemPct }}; background: {{ t.color }};"></div>
+                      </div>
+                      <span style="font-family: ui-monospace, monospace; font-size: 10.5px; font-variant-numeric: tabular-nums; color: rgba(255,255,255,0.42);">{{ t.itemCount }} steps</span>
+                    </div>
+                  </sc-if>
+                  <sc-if value="{{ t.running }}" hint-placeholder-val="{{ false }}">
+                    <div style="position: absolute; left: 0; right: 0; bottom: 0; height: 2px; overflow: hidden; background: rgba(147,0,255,0.18);">
+                      <div style="height: 100%; width: 38%; background: linear-gradient(90deg, transparent, #b300ff, #ffaf00, transparent); animation: tieSweep 2.6s cubic-bezier(0.22,0.61,0.36,1) infinite;"></div>
+                    </div>
+                  </sc-if>
+                </div>
+              </sc-for>
+            </div>
+
+            <button onClick="{{ hAdd }}" title="Add a task" style="flex: none; width: 54px; align-self: stretch; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; border-radius: 14px; border: 1.5px dashed rgba(147,0,255,0.4); background: transparent; cursor: pointer; color: rgba(255,255,255,0.72); transition: all 300ms cubic-bezier(0.22,0.61,0.36,1);" style-hover="background: rgba(147,0,255,0.12); border-color: #9300ff; color: #ffffff; transform: translateY(-2px);">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>
+              <span style="font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase;">Add</span>
+            </button>
+          </div>
+        </div>
+
+        <div style="position: absolute; inset: 0; display: flex; justify-content: center; pointer-events: none; align-items: {{ hAlign }};">
+          <div onClick="{{ hWake }}" style="pointer-events: {{ hPeekPe }}; display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 999px; border: 1px solid rgba(147,0,255,0.35); background: rgba(21,15,51,0.72); backdrop-filter: blur(14px); box-shadow: 0 10px 34px rgba(0,0,0,0.45); cursor: pointer; transition: transform 460ms cubic-bezier(0.16,1,0.3,1), opacity 300ms ease; transform: {{ hPeekT }}; opacity: {{ hPeekOp }};" style-hover="opacity: 1;">
+            <span style="flex: none; width: 8px; height: 8px; border-radius: 2px; transform: rotate(45deg); background: {{ hPeekColor }}; animation: tiePulse 2s ease-in-out infinite;"></span>
+            <span style="font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 12.5px; white-space: nowrap; max-width: 150px; overflow: hidden; text-overflow: ellipsis; color: rgba(255,255,255,0.92);">{{ hPeekName }}</span>
+            <span style="font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace; font-size: 12.5px; font-variant-numeric: tabular-nums; color: #ffaf00;">{{ hPeekTime }}</span>
+            <button onClick="{{ hPeekStop }}" title="Stop" style="flex: none; width: 24px; height: 24px; border-radius: 999px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 1.5px solid rgba(255,93,143,0.5); background: rgba(255,93,143,0.16); color: #ff5d8f; transition: all 180ms ease;" style-hover="background: #ff5d8f; color: #ffffff;">
+              <svg width="8" height="8" viewBox="0 0 24 24" fill="currentColor"><rect x="5" y="5" width="14" height="14" rx="2.5"></rect></svg>
+            </button>
+          </div>
+        </div>
+
+        <div style="position: absolute; inset: 0; display: flex; justify-content: center; pointer-events: none; align-items: {{ hAlign }};">
+          <div onClick="{{ hWake }}" title="Nothing tracking · click to open" style="width: 130px; height: 7px; cursor: pointer; background: linear-gradient(90deg, #4500ff, #9300ff, #b300ff, #ffaf00); box-shadow: 0 0 22px rgba(147,0,255,0.45); transition: opacity 300ms ease, transform 460ms cubic-bezier(0.16,1,0.3,1), height 180ms ease; pointer-events: {{ hRestPe }}; opacity: {{ hRestOp }}; transform: {{ hRestT }}; border-radius: {{ hRestRadius }};" style-hover="height: 13px; opacity: 1;"></div>
+        </div>
+
+        <sc-if value="{{ hUsageOpen }}" hint-placeholder-val="{{ false }}">
+          <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(12,8,36,0.55); backdrop-filter: blur(3px);">
+            <div style="width: 360px; box-sizing: border-box; border-radius: 20px; border: 1px solid rgba(147,0,255,0.4); background: linear-gradient(160deg, rgba(30,23,71,0.97), rgba(21,15,51,0.98)); box-shadow: 0 20px 60px rgba(0,0,0,0.55), 0 0 44px rgba(147,0,255,0.2); padding: 20px; display: flex; flex-direction: column; gap: 15px;">
+              <div style="display: flex; align-items: center; gap: 9px;">
+                <span style="font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255,255,255,0.55);">This Week</span>
+                <span style="flex: 1;"></span>
+                <button onClick="{{ hCloseUsage }}" title="Close" style="width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; border: none; background: transparent; cursor: pointer; color: rgba(255,255,255,0.3); transition: color 180ms ease;" style-hover="color: #ff5d8f;">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"></path></svg>
+                </button>
+              </div>
+              <div style="display: flex; align-items: baseline; gap: 12px;">
+                <span style="font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace; font-size: 32px; font-weight: 500; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; line-height: 1; color: #ffffff;">{{ wkTotal }}</span>
+                <span style="font-size: 12.5px; color: rgba(255,255,255,0.45);">{{ wkAvg }} a day</span>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 10px;">
+                <sc-for list="{{ wkTop3 }}" as="w" hint-placeholder-count="3">
+                  <div style="display: flex; flex-direction: column; gap: 6px;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                      <span style="flex: none; width: 8px; height: 8px; border-radius: 2px; transform: rotate(45deg); background: {{ w.color }};"></span>
+                      <span style="flex: 1; min-width: 0; font-family: 'Space Grotesk', sans-serif; font-weight: 500; font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: rgba(255,255,255,0.86);">{{ w.name }}</span>
+                      <span style="font-family: ui-monospace, monospace; font-size: 12px; font-variant-numeric: tabular-nums; color: rgba(255,255,255,0.6);">{{ w.hours }}</span>
+                    </div>
+                    <div style="height: 5px; border-radius: 999px; overflow: hidden; background: rgba(12,8,36,0.7);">
+                      <div style="height: 100%; border-radius: 999px; width: {{ w.barW }}; background: {{ w.color }};"></div>
+                    </div>
+                  </div>
+                </sc-for>
+              </div>
+              <a href="#3b" style="display: flex; align-items: center; justify-content: center; gap: 7px; padding: 10px 14px; border-radius: 999px; border: 1px solid rgba(147,0,255,0.4); font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 12.5px; transition: all 300ms cubic-bezier(0.22,0.61,0.36,1);" style-hover="background: rgba(147,0,255,0.12); border-color: #9300ff;">Open Full Review
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"></path></svg>
+              </a>
+            </div>
+          </div>
+        </sc-if>
+      </div>
+    </div>
+
+  </div>
+
+  <div style="display: flex; flex-wrap: wrap; gap: 20px; max-width: 1360px;">
+    <div style="flex: 1 1 300px; border-radius: 24px; border: 1px solid rgba(147,0,255,0.2); background: linear-gradient(160deg, rgba(30,23,71,0.8), rgba(21,15,51,0.9)); padding: 24px; display: flex; flex-direction: column; gap: 9px;">
+      <span style="font-family: 'Space Grotesk', sans-serif; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: #ffaf00;">The Stack</span>
+      <h3 style="margin: 0; font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 19px; color: #ffffff;">Tauri v2 + this HTML</h3>
+      <p style="margin: 0; font-size: 14px; line-height: 1.6; color: rgba(255,255,255,0.65); text-wrap: pretty;">The panel above is the whole front end. Tauri wraps it in a native window on both Windows and macOS, and only a handful of Rust lines are needed for the desktop behaviour.</p>
+    </div>
+    <div style="flex: 1 1 300px; border-radius: 24px; border: 1px solid rgba(147,0,255,0.2); background: linear-gradient(160deg, rgba(30,23,71,0.8), rgba(21,15,51,0.9)); padding: 24px; display: flex; flex-direction: column; gap: 9px;">
+      <span style="font-family: 'Space Grotesk', sans-serif; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: #ffaf00;">Window Config</span>
+      <h3 style="margin: 0; font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 19px; color: #ffffff;">Four flags do the hiding</h3>
+      <p style="margin: 0; font-size: 14px; line-height: 1.6; color: rgba(255,255,255,0.65); text-wrap: pretty;"><span style="font-family: ui-monospace, monospace; font-size: 12.5px; color: rgba(255,255,255,0.85);">transparent</span>, <span style="font-family: ui-monospace, monospace; font-size: 12.5px; color: rgba(255,255,255,0.85);">decorations: false</span>, <span style="font-family: ui-monospace, monospace; font-size: 12.5px; color: rgba(255,255,255,0.85);">alwaysOnTop</span> and <span style="font-family: ui-monospace, monospace; font-size: 12.5px; color: rgba(255,255,255,0.85);">skipTaskbar</span>. The slide-off is CSS; the window itself stays put at full size.</p>
+    </div>
+    <div style="flex: 1 1 300px; border-radius: 24px; border: 1px solid rgba(147,0,255,0.2); background: linear-gradient(160deg, rgba(30,23,71,0.8), rgba(21,15,51,0.9)); padding: 24px; display: flex; flex-direction: column; gap: 9px;">
+      <span style="font-family: 'Space Grotesk', sans-serif; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: #ffaf00;">Storage</span>
+      <h3 style="margin: 0; font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 19px; color: #ffffff;">One local SQLite file</h3>
+      <p style="margin: 0; font-size: 14px; line-height: 1.6; color: rgba(255,255,255,0.65); text-wrap: pretty;">Tasks, colours, notes and one row per tracked interval. Totals reset at midnight and every past day stays queryable for the history view.</p>
+    </div>
+  </div>
+
+</section>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;idleOpacity&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:0.55,&quot;min&quot;:0.15,&quot;max&quot;:1,&quot;step&quot;:0.05,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Idle behaviour&quot;},&quot;autoHideSeconds&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:6,&quot;min&quot;:2,&quot;max&quot;:30,&quot;unit&quot;:&quot;s&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Idle behaviour&quot;},&quot;reminderTime&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;5:30 PM&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;End of day&quot;}}">
+const PALETTE = ['#4500ff', '#9300ff', '#b300ff', '#ffaf00', '#34d39a', '#6aa6ff'];
+
+function pad(n) { return n < 10 ? '0' + n : '' + n; }
+function fmt(s) {
+  s = Math.max(0, Math.floor(s));
+  return Math.floor(s / 3600) + ':' + pad(Math.floor(s / 60) % 60) + ':' + pad(s % 60);
+}
+
+function seed(offsets) {
+  const names = ['Client regression suite', 'Sprint planning', 'Payments API build', 'Bug triage'];
+  const notes = ['Checkout flow, Safari + Edge', '', 'Refund endpoint', ''];
+  const lists = [
+    [['Checkout · Safari', true], ['Checkout · Edge', false], ['Guest flow', false]],
+    [],
+    [['Refund endpoint', true], ['Idempotency keys', false]],
+    []
+  ];
+  return names.map((n, i) => ({
+    id: 'k' + i, name: n, note: notes[i], color: PALETTE[i], seconds: offsets[i], expanded: false, done: i === 1,
+    items: lists[i].map((p, j) => ({ id: 'k' + i + 'i' + j, text: p[0], done: p[1] }))
+  }));
+}
+
+const WEEK = [
+  { name: 'Payments API build', color: '#b300ff', h: [2.5, 3.4, 1.2, 3.8, 2.6] },
+  { name: 'Client regression suite', color: '#4500ff', h: [3.2, 1.1, 4.0, 1.5, 1.2] },
+  { name: 'Bug triage', color: '#ffaf00', h: [1.0, 0.8, 1.4, 0.6, 1.1] },
+  { name: 'Sprint planning', color: '#34d39a', h: [0.5, 1.6, 0.3, 0.4, 0.7] },
+  { name: 'Client calls', color: '#6aa6ff', h: [0.6, 0.4, 0.5, 1.2, 0.4] }
+];
+const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
+const DAY_LONG = { Mon: 'Monday', Tue: 'Tuesday', Wed: 'Wednesday', Thu: 'Thursday', Fri: 'Friday' };
+
+function fmtH(h) {
+  const m = Math.round(h * 60);
+  return Math.floor(m / 60) + 'h ' + pad(m % 60) + 'm';
+}
+
+function week() {
+  const rows = WEEK.map(t => Object.assign({}, t, { total: t.h.reduce((a, b) => a + b, 0) }))
+    .sort((a, b) => b.total - a.total);
+  const total = rows.reduce((a, r) => a + r.total, 0);
+  const dayTotals = DAYS.map((d, i) => rows.reduce((a, r) => a + r.h[i], 0));
+  const maxDay = Math.max.apply(null, dayTotals);
+  const minDay = Math.min.apply(null, dayTotals);
+  const spread = rows.filter(r => r.h.every(v => v > 0))
+    .sort((a, b) => Math.max.apply(null, a.h) - Math.max.apply(null, b.h))[0];
+  return {
+    wkTasks: rows.map((r, i) => ({
+      name: r.name, color: r.color, hours: fmtH(r.total),
+      pct: Math.round(r.total / total * 100) + '%',
+      barW: (r.total / rows[0].total * 100).toFixed(1) + '%',
+      top: i === 0, nameColor: i === 0 ? '#ffffff' : 'rgba(255,255,255,0.82)'
+    })),
+    wkDays: DAYS.map((d, i) => ({
+      label: d,
+      h: (dayTotals[i] / maxDay * 100).toFixed(1) + '%',
+      labelColor: dayTotals[i] === maxDay ? '#ffaf00' : 'rgba(255,255,255,0.45)',
+      segs: rows.filter(r => r.h[i] > 0).map(r => ({
+        color: r.color, h: (r.h[i] / dayTotals[i] * 100).toFixed(1) + '%'
+      }))
+    })),
+    wkTotal: fmtH(total),
+    wkAvg: fmtH(total / DAYS.length),
+    wkCount: String(rows.length),
+    wkLongest: DAYS[dayTotals.indexOf(maxDay)] + ' · ' + fmtH(maxDay),
+    wkNotes: [
+      { text: rows[0].name + ' took ' + Math.round(rows[0].total / total * 100) + '% of the week, ' + fmtH(rows[0].total - rows[1].total) + ' more than anything else.' },
+      { text: spread.name + ' showed up on all five days but never for longer than ' + fmtH(Math.max.apply(null, spread.h)) + ' at a stretch. Worth batching.' },
+      { text: DAY_LONG[DAYS[dayTotals.indexOf(minDay)]] + ' was the lightest day at ' + fmtH(minDay) + ', against a ' + fmtH(maxDay) + ' peak on ' + DAY_LONG[DAYS[dayTotals.indexOf(maxDay)]] + '.' }
+    ]
+  };
+}
+
+class Component extends DCLogic {
+  state = {
+    v: { tasks: seed([4820, 1935, 7260, 640]), running: 'k2', general: 14655, idle: false, usage: false, edge: 'right' },
+    h: { tasks: seed([3140, 2280, 5015, 1120]), running: 'k0', general: 11555, idle: false, usage: false, edge: 'top' },
+    reminder: true
+  };
+
+  componentDidMount() {
+    this.tick = setInterval(() => {
+      this.setState(s => {
+        const next = {};
+        ['v', 'h'].forEach(k => {
+          const p = s[k];
+          if (!p.running) { next[k] = p; return; }
+          next[k] = Object.assign({}, p, {
+            general: p.general + 1,
+            tasks: p.tasks.map(t => t.id === p.running ? Object.assign({}, t, { seconds: t.seconds + 1 }) : t)
+          });
+        });
+        return next;
+      });
+    }, 1000);
+    this.autoHide('v');
+    this.autoHide('h');
+  }
+
+  componentWillUnmount() {
+    clearInterval(this.tick);
+    clearTimeout(this.tv);
+    clearTimeout(this.th);
+  }
+
+  patch(k, fields) { this.setState(s => ({ [k]: Object.assign({}, s[k], fields) })); }
+
+  autoHide(k) {
+    const delay = (this.props.autoHideSeconds ?? 6) * 1000;
+    clearTimeout(k === 'v' ? this.tv : this.th);
+    const id = setTimeout(() => this.patch(k, { idle: true }), delay);
+    if (k === 'v') { this.tv = id; } else { this.th = id; }
+  }
+
+  wake(k) {
+    const p = this.state[k];
+    if (p.idle || p.usage) { this.patch(k, { idle: false, usage: false }); }
+    this.autoHide(k);
+  }
+
+  sleep(k) {
+    clearTimeout(k === 'v' ? this.tv : this.th);
+    this.patch(k, { idle: true, usage: false });
+  }
+
+  usage(k, on) {
+    clearTimeout(k === 'v' ? this.tv : this.th);
+    this.patch(k, { idle: true, usage: on });
+  }
+
+  toggle(k, id) {
+    this.wake(k);
+    this.setState(s => ({ [k]: Object.assign({}, s[k], { running: s[k].running === id ? null : id }) }));
+  }
+
+  add(k) {
+    this.wake(k);
+    this.setState(s => {
+      const p = s[k];
+      const t = { id: 'n' + Date.now(), name: '', note: '', color: PALETTE[p.tasks.length % PALETTE.length], seconds: 0, expanded: false };
+      return { [k]: Object.assign({}, p, { tasks: p.tasks.concat([t]) }) };
+    });
+  }
+
+  edit(k, id, fields) {
+    this.setState(s => ({
+      [k]: Object.assign({}, s[k], {
+        tasks: s[k].tasks.map(t => t.id === id ? Object.assign({}, t, fields) : t)
+      })
+    }));
+  }
+
+  setDone(k, id, done) {
+    this.setState(s => {
+      const p = s[k];
+      return { [k]: Object.assign({}, p, {
+        running: done && p.running === id ? null : p.running,
+        tasks: p.tasks.map(t => t.id === id ? Object.assign({}, t, { done: done }) : t)
+      }) };
+    });
+  }
+
+  allDone(k) {
+    this.setState(s => {
+      const p = s[k];
+      return { [k]: Object.assign({}, p, { running: null, tasks: p.tasks.map(t => Object.assign({}, t, { done: true })) }) };
+    });
+  }
+
+  mutateItems(k, id, fn) {
+    this.setState(s => ({
+      [k]: Object.assign({}, s[k], {
+        tasks: s[k].tasks.map(t => t.id === id ? Object.assign({}, t, { items: fn(t.items || []) }) : t)
+      })
+    }));
+  }
+
+  remove(k, id) {
+    this.wake(k);
+    this.setState(s => {
+      const p = s[k];
+      return { [k]: Object.assign({}, p, { tasks: p.tasks.filter(t => t.id !== id), running: p.running === id ? null : p.running }) };
+    });
+  }
+
+  pane(k) {
+    const p = this.state[k];
+    const dim = this.props.idleOpacity ?? 0.55;
+    const active = !!p.running;
+    const cur = p.tasks.find(t => t.id === p.running);
+    const off = k === 'v'
+      ? (p.edge === 'right' ? 'translateX(calc(100% + 26px))' : 'translateX(calc(-100% - 26px))')
+      : (p.edge === 'top' ? 'translateY(calc(-100% - 26px))' : 'translateY(calc(100% + 26px))');
+    const peekOff = k === 'v'
+      ? (p.edge === 'right' ? 'translateX(calc(100% + 20px))' : 'translateX(calc(-100% - 20px))')
+      : (p.edge === 'top' ? 'translateY(calc(-100% - 20px))' : 'translateY(calc(100% + 20px))');
+    const peekIn = k === 'v'
+      ? (p.edge === 'right' ? 'translateX(-14px)' : 'translateX(14px)')
+      : (p.edge === 'top' ? 'translateY(14px)' : 'translateY(-14px)');
+    const showPeek = p.idle && active && !p.usage;
+    const showRest = p.idle && !active && !p.usage;
+    const restRadius = { right: '7px 0 0 7px', left: '0 7px 7px 0', top: '0 0 7px 7px', bottom: '7px 7px 0 0' }[p.edge];
+    const chip = (on) => ({
+      bg: on ? 'linear-gradient(135deg, #4500ff, #b300ff)' : 'transparent',
+      fg: on ? '#ffffff' : 'rgba(255,255,255,0.6)'
+    });
+    const sActive = chip(!p.idle), sIdle = chip(p.idle);
+    const e1 = chip(k === 'v' ? p.edge === 'left' : p.edge === 'top');
+    const e2 = chip(k === 'v' ? p.edge === 'right' : p.edge === 'bottom');
+
+    return {
+      Tasks: p.tasks.map(t => {
+        const run = t.id === p.running;
+        const items = t.items || [];
+        const ticked = items.filter(i => i.done).length;
+        return {
+          items: items.map(i => ({
+            text: i.text,
+            strike: i.done ? 'line-through' : 'none',
+            dim: i.done ? 0.45 : 1,
+            checkBg: i.done ? t.color : 'transparent',
+            done: i.done,
+            onToggle: () => this.mutateItems(k, t.id, list => list.map(x => x.id === i.id ? Object.assign({}, x, { done: !x.done }) : x)),
+            onText: (e) => this.mutateItems(k, t.id, list => list.map(x => x.id === i.id ? Object.assign({}, x, { text: e.target.value }) : x)),
+            onRemove: () => this.mutateItems(k, t.id, list => list.filter(x => x.id !== i.id))
+          })),
+          itemCount: ticked + '/' + items.length,
+          itemPct: items.length ? (ticked / items.length * 100).toFixed(0) + '%' : '0%',
+          listOnly: !t.expanded && items.length > 0,
+          onAddItem: (e) => {
+            if (e.key !== 'Enter') { return; }
+            const v = e.target.value.trim();
+            if (!v) { return; }
+            e.target.value = '';
+            this.mutateItems(k, t.id, list => list.concat([{ id: 'i' + Date.now(), text: v, done: false }]));
+          },
+          name: t.name, note: t.note, color: t.color, time: fmt(t.seconds),
+          running: run, idle: !run,
+          expanded: t.expanded,
+          done: !!t.done,
+          strike: t.done ? 'line-through' : 'none',
+          dim: t.done ? 0.42 : 1,
+          checkBg: t.done ? t.color : 'transparent',
+          checkBorder: t.color,
+          onDone: () => this.setDone(k, t.id, !t.done),
+          noteOnly: !t.expanded && !!t.note,
+          chevRot: t.expanded ? 'rotate(180deg)' : 'rotate(0deg)',
+          chevColor: t.expanded ? '#ffaf00' : 'rgba(255,255,255,0.28)',
+          rowBg: run ? 'rgba(147,0,255,0.14)' : 'rgba(12,8,36,0.42)',
+          rowBorder: run ? 'rgba(147,0,255,0.5)' : 'rgba(147,0,255,0.14)',
+          timeColor: run ? '#ffffff' : 'rgba(255,255,255,0.5)',
+          btnBg: run ? 'linear-gradient(135deg, #4500ff, #b300ff)' : 'transparent',
+          btnBorder: run ? 'rgba(179,0,255,0.9)' : 'rgba(147,0,255,0.4)',
+          btnGlow: run ? '0 0 22px rgba(147,0,255,0.55)' : 'none',
+          swatches: PALETTE.map(c => ({
+            color: c,
+            ring: c === t.color ? '#ffffff' : 'transparent',
+            onPick: () => this.edit(k, t.id, { color: c })
+          })),
+          onToggle: () => this.toggle(k, t.id),
+          onName: (e) => this.edit(k, t.id, { name: e.target.value }),
+          onNote: (e) => this.edit(k, t.id, { note: e.target.value }),
+          onExpand: () => this.edit(k, t.id, { expanded: !t.expanded }),
+          onRemove: () => this.remove(k, t.id)
+        };
+      }),
+      General: fmt(p.general),
+      GenColor: active ? '#ffffff' : 'rgba(255,255,255,0.42)',
+      GenBarOp: active ? 1 : 0.2,
+      DotColor: active ? '#ffaf00' : 'rgba(255,255,255,0.25)',
+      DotAnim: active ? 'tiePulse 2s ease-in-out infinite' : 'none',
+      DotLabel: active ? 'Tracking' : 'Paused',
+      Count: p.tasks.length + (p.tasks.length === 1 ? ' task' : ' tasks') + (p.tasks.filter(t => t.done).length ? ' · ' + p.tasks.filter(t => t.done).length + ' done' : ''),
+      PanelT: (p.idle || p.usage) ? off : 'translate(0, 0)',
+      PanelOp: (p.idle || p.usage) ? 0 : 1,
+      RestT: showRest ? 'translate(0, 0)' : peekOff,
+      RestOp: showRest ? dim : 0,
+      RestPe: showRest ? 'auto' : 'none',
+      RestRadius: restRadius,
+      UsageOpen: !!p.usage,
+      OpenUsage: () => this.usage(k, true),
+      CloseUsage: () => this.usage(k, false),
+      PeekT: showPeek ? peekIn : peekOff,
+      PeekOp: showPeek ? dim : 0,
+      PeekPe: showPeek ? 'auto' : 'none',
+      PeekName: cur ? (cur.name || 'Untitled task') : '',
+      PeekTime: cur ? fmt(cur.seconds) : '',
+      PeekColor: cur ? cur.color : '#ffaf00',
+      PeekStop: (e) => { e.stopPropagation(); this.patch(k, { running: null, idle: false }); this.autoHide(k); },
+      Justify: p.edge === 'right' ? 'flex-end' : 'flex-start',
+      Align: p.edge === 'top' ? 'flex-start' : 'flex-end',
+      Wake: () => this.wake(k),
+      Sleep: () => this.sleep(k),
+      Add: () => this.add(k),
+      ChipActiveBg: sActive.bg, ChipActiveFg: sActive.fg,
+      ChipIdleBg: sIdle.bg, ChipIdleFg: sIdle.fg,
+      ChipLeftBg: e1.bg, ChipLeftFg: e1.fg,
+      ChipRightBg: e2.bg, ChipRightFg: e2.fg,
+      ChipTopBg: e1.bg, ChipTopFg: e1.fg,
+      ChipBottomBg: e2.bg, ChipBottomFg: e2.fg,
+      EdgeLeft: () => { this.wake(k); this.patch(k, { edge: 'left' }); },
+      EdgeRight: () => { this.wake(k); this.patch(k, { edge: 'right' }); },
+      EdgeTop: () => { this.wake(k); this.patch(k, { edge: 'top' }); },
+      EdgeBottom: () => { this.wake(k); this.patch(k, { edge: 'bottom' }); }
+    };
+  }
+
+  renderVals() {
+    const vp = this.state.v;
+    const bar = vp.tasks.find(t => t.id === vp.running) || vp.tasks[0];
+    const open = vp.tasks.filter(t => !t.done);
+    const out = Object.assign({
+      barName: bar ? (bar.name || 'Untitled task') : 'No task',
+      barTime: bar ? fmt(bar.seconds) : '0:00:00',
+      barColor: bar ? bar.color : '#ffaf00',
+      remOpen: this.state.reminder,
+      remClosed: !this.state.reminder,
+      remTime: this.props.reminderTime ?? '5:30 PM',
+      remHeadline: open.length
+        ? open.length + (open.length === 1 ? ' task is' : ' tasks are') + ' still open'
+        : 'The day is closed out',
+      remSub: open.length
+        ? 'Carry them into tomorrow, or tick off anything you actually finished.'
+        : 'Every task on today\u2019s list is ticked. Nothing to carry over.',
+      remEmpty: open.length === 0,
+      remTasks: open.map(t => ({
+        name: t.name || 'Untitled task', color: t.color, time: fmt(t.seconds),
+        onDone: () => this.setDone('v', t.id, true)
+      })),
+      remDismiss: () => this.setState({ reminder: false }),
+      remShow: () => this.setState({ reminder: true }),
+      remCarry: () => this.setState({ reminder: false }),
+      remAllDone: () => { this.allDone('v'); }
+    }, week());
+    ['v', 'h'].forEach(k => {
+      const vals = this.pane(k);
+      Object.keys(vals).forEach(key => { out[k + key] = vals[key]; });
+    });
+    out.wkTop3 = out.wkTasks.slice(0, 3);
+    return out;
+  }
+}
+</script>
+</body>
+</html>
