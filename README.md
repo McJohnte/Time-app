@@ -86,12 +86,15 @@ logged history, so it fills in as the week goes on.
 
 ## Settings
 
+Open them with the gear in the widget's footer. Changes apply immediately — switching the dock
+moves and resizes the window straight away.
+
 Stored in `settings.json` in the app's data directory.
 
 | Key | Default | Meaning |
 | --- | --- | --- |
 | `orientation` | `vertical` | `vertical` (side dock) or `horizontal` (top/bottom bar) |
-| `edge` | `right` | `left`/`right` when vertical, `top`/`bottom` when horizontal |
+| `edge` | `right` | `left`/`right` when vertical, `top`/`bottom` when horizontal — coerced to a valid edge when you switch orientation |
 | `autoHideSeconds` | `6` | Idle delay before the panel slides away |
 | `idleOpacity` | `0.55` | Opacity of the peek and sliver states |
 | `reminderTime` | `17:30` | When the end-of-day reminder fires |

@@ -3,15 +3,17 @@ import { invoke } from '@tauri-apps/api/core'
 import { listen } from '@tauri-apps/api/event'
 import TaskRow from './TaskRow'
 import ReminderOverlay from './ReminderOverlay'
+import SettingsPanel from './SettingsPanel'
 import { useTimer, fmt, fmtH } from '../store'
 import { applyGeometry, show } from '../windowGeometry'
 import { notifyReminder, ensurePermission } from '../notifications'
 import { weekSummary } from '../week'
-import { Logo, Plus, Stop } from '../icons'
+import { Logo, Plus, Stop, Gear } from '../icons'
 
 export default function Widget() {
   const s = useTimer()
   const [week, setWeek] = useState(null)
+  const [prefs, setPrefs] = useState(false)
   const geo = useRef('')
 
   const orientation = s.settings?.orientation ?? 'vertical'
@@ -20,15 +22,17 @@ export default function Widget() {
   const active = !!s.running
   const cur = s.tasks.find((t) => t.id === s.running)
 
-  const state = s.reminder || !s.idle || s.usage ? 'panel' : active ? 'peek' : 'rest'
+  const state = prefs || s.reminder || !s.idle || s.usage ? 'panel' : active ? 'peek' : 'rest'
+
+  const overlay = prefs || s.usage || s.reminder
 
   useEffect(() => {
     if (!s.ready) return
-    const key = `${state}|${orientation}|${edge}`
+    const key = `${state}|${orientation}|${edge}|${overlay}`
     if (geo.current === key) return
     geo.current = key
-    applyGeometry(state, orientation, edge).then(show)
-  }, [s.ready, state, orientation, edge])
+    applyGeometry(state, orientation, edge, overlay).then(show)
+  }, [s.ready, state, orientation, edge, overlay])
 
   useEffect(() => {
     ensurePermission()
@@ -173,6 +177,14 @@ export default function Widget() {
       <button className="linkBtn" onClick={() => invoke('open_review')}>
         Review
       </button>
+      <button
+        className="iconBtn"
+        title="Settings"
+        onClick={() => setPrefs(true)}
+        style={{ width: 20, height: 20, color: 'rgba(255,255,255,0.4)' }}
+      >
+        <Gear />
+      </button>
     </div>
   )
 
@@ -196,19 +208,59 @@ export default function Widget() {
         </>
       ) : (
         <>
+          {/* Compact column — the bar is only 148px tall, so the boxed total card
+              and the standard footer are inlined to keep every control reachable. */}
           <div
             style={{
               flex: 'none',
-              width: 178,
+              width: 186,
               display: 'flex',
               flexDirection: 'column',
-              gap: 7,
+              gap: 6,
               paddingRight: 16,
               borderRight: '1px solid rgba(147,0,255,0.2)',
             }}
           >
-            {header}
-            {footer}
+            <div className="brandRow" data-tauri-drag-region>
+              <Logo size={15} />
+              <span className="label">Total today</span>
+            </div>
+            <span
+              className="totalTime"
+              style={{ fontSize: 31, color: active ? '#fff' : 'rgba(255,255,255,0.42)' }}
+            >
+              {fmt(s.general)}
+            </span>
+            <div className="rainbowTrack" style={{ marginTop: 2 }}>
+              <div className="rainbow" style={{ opacity: active ? 1 : 0.2 }} />
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginTop: 2 }}>
+              <span
+                className="statusDot"
+                style={{
+                  width: 6,
+                  height: 6,
+                  background: active ? '#ffaf00' : 'rgba(255,255,255,0.25)',
+                  animation: active ? 'tiePulse 2s ease-in-out infinite' : 'none',
+                }}
+              />
+              <span className="statusLabel">{active ? 'Tracking' : 'Paused'}</span>
+              <span className="spacer" />
+              <button className="linkBtn" style={{ fontSize: 10 }} onClick={() => s.openUsage(true)}>
+                Usage
+              </button>
+              <button className="linkBtn" style={{ fontSize: 10 }} onClick={() => invoke('open_review')}>
+                Review
+              </button>
+              <button
+                className="iconBtn"
+                title="Settings"
+                onClick={() => setPrefs(true)}
+                style={{ width: 16, height: 16, color: 'rgba(255,255,255,0.4)' }}
+              >
+                <Gear size={11} />
+              </button>
+            </div>
           </div>
           {list}
           {addBtn}
@@ -276,6 +328,18 @@ export default function Widget() {
             </button>
           </div>
         </div>
+      )}
+
+      {prefs && (
+        <SettingsPanel
+          settings={s.settings}
+          onDock={s.setDock}
+          onChange={s.update}
+          onClose={() => {
+            setPrefs(false)
+            s.wake()
+          }}
+        />
       )}
 
       {s.reminder && (

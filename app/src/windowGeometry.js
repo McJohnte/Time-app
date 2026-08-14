@@ -1,14 +1,27 @@
-import { getCurrentWindow, LogicalPosition, LogicalSize, currentMonitor } from '@tauri-apps/api/window'
+import {
+  getCurrentWindow,
+  LogicalPosition,
+  LogicalSize,
+  currentMonitor,
+  primaryMonitor,
+} from '@tauri-apps/api/window'
 
 export const PANEL = { vertical: { w: 286, h: 720 }, horizontal: { w: 900, h: 148 } }
 export const PEEK = { vertical: { w: 250, h: 46 }, horizontal: { w: 250, h: 46 } }
 export const REST = { vertical: { w: 14, h: 130 }, horizontal: { w: 130, h: 14 } }
 
-const MARGIN = 12
+/** Overlay cards (settings, reminder, usage) need this much room to read properly. */
+const OVERLAY_MIN_H = 560
 
-export function sizeFor(state, orientation) {
-  const table = state === 'panel' ? PANEL : state === 'peek' ? PEEK : REST
-  return table[orientation]
+const MARGIN = 12
+/** Keep clear of the macOS menu bar, which an always-on-top window would otherwise cover. */
+const TOP_INSET = navigator.userAgent.includes('Mac') ? 26 : 0
+
+export function sizeFor(state, orientation, overlay = false) {
+  if (state !== 'panel') return (state === 'peek' ? PEEK : REST)[orientation]
+  const base = PANEL[orientation]
+  // The horizontal bar is far too short to hold a card — grow it while one is open.
+  return overlay && base.h < OVERLAY_MIN_H ? { w: base.w, h: OVERLAY_MIN_H } : base
 }
 
 /** Top-left position that pins `size` against `edge` on the work area. */
@@ -26,18 +39,20 @@ function positionFor(size, edge, area) {
   }
 }
 
-export async function applyGeometry(state, orientation, edge) {
+export async function applyGeometry(state, orientation, edge, overlay = false) {
   const win = getCurrentWindow()
-  const mon = await currentMonitor()
+  // Anchor to the menu-bar screen. Without this the dock lands on whichever
+  // monitor the window happened to open on, which can be off to one side.
+  const mon = (await primaryMonitor()) || (await currentMonitor())
   if (!mon) return
   const scale = mon.scaleFactor || 1
   const area = {
     x: mon.position.x / scale,
-    y: mon.position.y / scale,
+    y: mon.position.y / scale + TOP_INSET,
     width: mon.size.width / scale,
-    height: mon.size.height / scale,
+    height: mon.size.height / scale - TOP_INSET,
   }
-  const base = sizeFor(state, orientation)
+  const base = sizeFor(state, orientation, overlay)
   const size = {
     w: Math.min(base.w, area.width - MARGIN * 2),
     h: Math.min(base.h, area.height - MARGIN * 2),

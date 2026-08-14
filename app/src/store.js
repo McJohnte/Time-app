@@ -4,6 +4,9 @@ import { loadSettings, saveSetting } from './settings'
 
 export const PALETTE = ['#4500ff', '#9300ff', '#b300ff', '#ffaf00', '#34d39a', '#6aa6ff']
 
+/** Which screen edges each dock orientation can sit on. */
+export const EDGES = { vertical: ['right', 'left'], horizontal: ['top', 'bottom'] }
+
 export function pad(n) {
   return n < 10 ? '0' + n : '' + n
 }
@@ -247,6 +250,15 @@ export function useTimer() {
     await saveSetting(key, value)
   }
 
+  /** Orientation and edge move together — a vertical dock can't sit on the top edge. */
+  async function setDock(orientation, edge) {
+    const valid = EDGES[orientation]
+    const next = valid.includes(edge) ? edge : valid[0]
+    setSettings((s) => ({ ...s, orientation, edge: next }))
+    await saveSetting('orientation', orientation)
+    await saveSetting('edge', next)
+  }
+
   return {
     ready,
     tasks,
@@ -269,5 +281,6 @@ export function useTimer() {
     carryOver,
     setReminder,
     update,
+    setDock,
   }
 }

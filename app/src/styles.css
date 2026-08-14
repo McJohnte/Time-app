@@ -123,12 +123,14 @@ a { color: var(--amber); text-decoration: none; }
 }
 .taskList.horizontal {
   flex-direction: row;
+  min-width: 0;
   overflow-x: auto;
   overflow-y: hidden;
   align-items: stretch;
   gap: 10px;
   padding-bottom: 2px;
 }
+.panel.horizontal .addBtn { flex-direction: column; padding: 11px 14px; }
 
 .row {
   position: relative;
@@ -385,12 +387,16 @@ a { color: var(--amber); text-decoration: none; }
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 12px;
   background: rgba(12, 8, 36, 0.55);
   backdrop-filter: blur(3px);
   border-radius: 24px;
 }
 .card {
-  width: 296px;
+  width: 100%;
+  max-width: 296px;
+  max-height: 100%;
+  overflow-y: auto;
   border-radius: 20px;
   border: 1px solid rgba(147, 0, 255, 0.4);
   background: linear-gradient(160deg, rgba(30, 23, 71, 0.97), rgba(21, 15, 51, 0.98));
