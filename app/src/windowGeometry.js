@@ -16,8 +16,8 @@ export const OVERLAY_MIN_H = 560
 export const EXPANDED_MIN_H = 330
 
 const MARGIN = 12
-/** Keep clear of the macOS menu bar, which an always-on-top window would otherwise cover. */
-const TOP_INSET = navigator.userAgent.includes('Mac') ? 26 : 0
+/** Fallback inset for the macOS menu bar if a monitor reports no work area. */
+const MENU_BAR_FALLBACK = navigator.userAgent.includes('Mac') ? 26 : 0
 
 export function sizeFor(state, orientation, minH = 0) {
   if (state !== 'panel') return (state === 'peek' ? PEEK : REST)[orientation]
@@ -49,12 +49,22 @@ export async function applyGeometry(state, orientation, edge, minH = 0) {
   const mon = (await primaryMonitor()) || (await currentMonitor())
   if (!mon) return
   const scale = mon.scaleFactor || 1
-  const area = {
-    x: mon.position.x / scale,
-    y: mon.position.y / scale + TOP_INSET,
-    width: mon.size.width / scale,
-    height: mon.size.height / scale - TOP_INSET,
-  }
+  // The work area already excludes the macOS menu bar and Dock and the Windows
+  // taskbar, so an always-on-top dock does not end up sitting under them.
+  const wa = mon.workArea
+  const area = wa
+    ? {
+        x: wa.position.x / scale,
+        y: wa.position.y / scale,
+        width: wa.size.width / scale,
+        height: wa.size.height / scale,
+      }
+    : {
+        x: mon.position.x / scale,
+        y: mon.position.y / scale + MENU_BAR_FALLBACK,
+        width: mon.size.width / scale,
+        height: mon.size.height / scale - MENU_BAR_FALLBACK,
+      }
   const base = sizeFor(state, orientation, minH)
   const size = {
     w: Math.min(base.w, area.width - MARGIN * 2),
