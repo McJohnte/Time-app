@@ -54,6 +54,15 @@ export function useTimer() {
   const dayRef = useRef(db.today())
   const hideTimer = useRef(null)
   const firedRef = useRef(null)
+  /**
+   * Wall-clock anchor for the running task: when it started and what the task
+   * and daily totals were at that moment. Elapsed time is derived from this
+   * rather than counted a tick at a time, because the webview's timers are
+   * throttled or suspended whenever the window is occluded — on another Space,
+   * covered by another app, or with the display asleep — and every tick that
+   * does not fire would otherwise be time silently lost.
+   */
+  const anchorRef = useRef(null)
 
   tasksRef.current = tasks
   runningRef.current = running
@@ -79,6 +88,14 @@ export function useTimer() {
     })()
   }, [])
 
+  /** Re-base the wall-clock anchor on the currently running task. */
+  function anchor(id) {
+    const t = id ? tasksRef.current.find((x) => x.id === id) : null
+    anchorRef.current = t
+      ? { id, at: Date.now(), taskBase: t.seconds, generalBase: generalRef.current }
+      : null
+  }
+
   /** Carry over: unticked tasks (and their notes/steps) survive with clocks back at zero. */
   async function rollover(list, day, closingDay = dayRef.current) {
     const kept = list.filter((t) => !t.done)
@@ -91,6 +108,7 @@ export function useTimer() {
     await db.setState('day', day)
     setGeneral(0)
     setRunning(null)
+    anchorRef.current = null
     return kept.map((t) => ({ ...t, seconds: 0 }))
   }
 
@@ -104,9 +122,13 @@ export function useTimer() {
         return
       }
       const run = runningRef.current
-      if (!run) return
-      setGeneral((g) => g + 1)
-      setTasks((list) => list.map((t) => (t.id === run ? { ...t, seconds: t.seconds + 1 } : t)))
+      const a = anchorRef.current
+      if (!run || !a || a.id !== run) return
+      const elapsed = Math.max(0, Math.round((Date.now() - a.at) / 1000))
+      setGeneral(a.generalBase + elapsed)
+      setTasks((list) =>
+        list.map((t) => (t.id === run ? { ...t, seconds: a.taskBase + elapsed } : t))
+      )
     }, 1000)
     return () => clearInterval(id)
   }, [])
@@ -179,8 +201,10 @@ export function useTimer() {
   async function toggle(id) {
     wake()
     const was = runningRef.current
-    setRunning(was === id ? null : id)
+    const next = was === id ? null : id
+    setRunning(next)
     if (was) await flush(was)
+    anchor(next)
   }
 
   async function add() {
@@ -210,6 +234,7 @@ export function useTimer() {
     if (done && runningRef.current === id) {
       setRunning(null)
       await flush(id)
+      anchor(null)
     }
     setTasks((l) => l.map((t) => (t.id === id ? { ...t, done } : t)))
     await db.updateTask(id, { done })
@@ -220,6 +245,7 @@ export function useTimer() {
     if (run) {
       setRunning(null)
       await flush(run)
+      anchor(null)
     }
     setTasks((l) => l.map((t) => ({ ...t, done: true })))
     for (const t of tasksRef.current) await db.updateTask(t.id, { done: true })
@@ -235,7 +261,10 @@ export function useTimer() {
 
   async function remove(id) {
     wake()
-    if (runningRef.current === id) setRunning(null)
+    if (runningRef.current === id) {
+      setRunning(null)
+      anchor(null)
+    }
     setTasks((l) => l.filter((t) => t.id !== id))
     await db.deleteTask(id)
   }
