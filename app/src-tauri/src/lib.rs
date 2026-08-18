@@ -39,28 +39,58 @@ CREATE INDEX IF NOT EXISTS idx_items_task ON checklist_items(task_id);
 CREATE INDEX IF NOT EXISTS idx_logs_date ON time_logs(date);
 ";
 
-/// Keep the widget on every Space, including over full-screen apps.
+/// Pin the widget above other windows and onto every Space.
 ///
-/// Tauri's `set_visible_on_all_workspaces` only sets `CanJoinAllSpaces`, which
-/// follows the user between ordinary desktops but still hides the window when a
-/// full-screen app is frontmost. `FullScreenAuxiliary` is the missing half.
+/// Two things have to be true, and Tauri's own flags only give one of them.
+/// `alwaysOnTop` maps to NSFloatingWindowLevel (3), which sits above ordinary
+/// windows but not above another app's full-screen Space, and
+/// `set_visible_on_all_workspaces` sets only `CanJoinAllSpaces`. Menu-bar style
+/// utilities need status level plus `FullScreenAuxiliary` to float over a
+/// full-screen app.
+///
+/// This is re-applied every time the widget is shown, not just at startup:
+/// tao sets the always-on-top level asynchronously, so a level set once during
+/// setup can be quietly reset back to floating afterwards.
 #[cfg(target_os = "macos")]
-fn keep_on_all_spaces(window: &tauri::WebviewWindow) {
-    use objc2_app_kit::{NSWindow, NSWindowCollectionBehavior};
+fn pin_to_all_spaces(window: &tauri::WebviewWindow) {
+    use objc2_app_kit::{NSWindow, NSWindowCollectionBehavior, NSStatusWindowLevel};
 
     let Ok(ptr) = window.ns_window() else { return };
     if ptr.is_null() {
         return;
     }
     // Safety: Tauri hands back the live NSWindow for this webview window, and
-    // this only runs on the main thread during setup.
+    // commands are dispatched on the main thread.
     unsafe {
         let ns = &*(ptr as *const NSWindow);
         ns.setCollectionBehavior(
             ns.collectionBehavior()
                 | NSWindowCollectionBehavior::CanJoinAllSpaces
-                | NSWindowCollectionBehavior::FullScreenAuxiliary,
+                | NSWindowCollectionBehavior::FullScreenAuxiliary
+                | NSWindowCollectionBehavior::Stationary,
         );
+        ns.setLevel(NSStatusWindowLevel);
+    }
+}
+
+/// Re-assert the widget's pinning. Called from the front end after each show.
+///
+/// On macOS the work is hopped onto the main thread, because commands run on a
+/// worker thread and AppKit calls made off the main thread do nothing. Note
+/// that `set_always_on_top` is deliberately not called here: it dispatches a
+/// level change to floating asynchronously, which would land after this and
+/// undo the status level set below.
+#[tauri::command]
+fn pin_widget(window: tauri::WebviewWindow) {
+    #[cfg(target_os = "macos")]
+    {
+        let w = window.clone();
+        let _ = window.run_on_main_thread(move || pin_to_all_spaces(&w));
+    }
+    #[cfg(not(target_os = "macos"))]
+    {
+        let _ = window.set_always_on_top(true);
+        let _ = window.set_visible_on_all_workspaces(true);
     }
 }
 
@@ -102,7 +132,7 @@ pub fn run() {
                 .add_migrations("sqlite:tie-timer.db", migrations)
                 .build(),
         )
-        .invoke_handler(tauri::generate_handler![open_review])
+        .invoke_handler(tauri::generate_handler![open_review, pin_widget])
         .setup(|app| {
             // No Dock icon on macOS — this is a tray/widget app.
             #[cfg(target_os = "macos")]
@@ -112,9 +142,13 @@ pub fn run() {
             // on whichever desktop they are working in rather than only the one it
             // was launched on.
             if let Some(w) = app.get_webview_window("main") {
-                let _ = w.set_visible_on_all_workspaces(true);
                 #[cfg(target_os = "macos")]
-                keep_on_all_spaces(&w);
+                {
+                    let win = w.clone();
+                    let _ = w.run_on_main_thread(move || pin_to_all_spaces(&win));
+                }
+                #[cfg(not(target_os = "macos"))]
+                let _ = w.set_visible_on_all_workspaces(true);
             }
 
             let show = MenuItem::with_id(app, "show", "Show Widget", true, None::<&str>)?;

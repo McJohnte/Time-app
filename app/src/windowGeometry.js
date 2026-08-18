@@ -1,3 +1,4 @@
+import { invoke } from '@tauri-apps/api/core'
 import {
   getCurrentWindow,
   LogicalPosition,
@@ -78,4 +79,12 @@ export async function applyGeometry(state, orientation, edge, minH = 0) {
 export async function show() {
   const win = getCurrentWindow()
   await win.show()
+  // Re-assert level and Space membership on every show. Showing a window can
+  // land after tao's asynchronous always-on-top call, which would otherwise
+  // leave the widget at floating level and behind full-screen apps.
+  try {
+    await invoke('pin_widget')
+  } catch {
+    // Non-fatal: the widget is still usable, just not pinned above everything.
+  }
 }

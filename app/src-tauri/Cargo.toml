@@ -1,6 +1,6 @@
 [package]
 name = "tie-timer"
-version = "0.1.4"
+version = "0.1.5"
 description = "TIE Timer — track the day without leaving your work"
 authors = ["TIE"]
 edition = "2021"
