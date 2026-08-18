@@ -5,7 +5,7 @@ import TaskRow from './TaskRow'
 import ReminderOverlay from './ReminderOverlay'
 import SettingsPanel from './SettingsPanel'
 import { useTimer, fmt, fmtH } from '../store'
-import { applyGeometry, show } from '../windowGeometry'
+import { applyGeometry, show, OVERLAY_MIN_H, EXPANDED_MIN_H } from '../windowGeometry'
 import { notifyReminder, ensurePermission } from '../notifications'
 import { weekSummary } from '../week'
 import { Logo, Plus, Stop, Gear } from '../icons'
@@ -25,14 +25,17 @@ export default function Widget() {
   const state = prefs || s.reminder || !s.idle || s.usage ? 'panel' : active ? 'peek' : 'rest'
 
   const overlay = prefs || s.usage || s.reminder
+  // How much height the current content needs. The horizontal bar is 148px, so
+  // both a card and an expanded row would otherwise be cut off.
+  const needH = overlay ? OVERLAY_MIN_H : s.tasks.some((t) => t.expanded) ? EXPANDED_MIN_H : 0
 
   useEffect(() => {
     if (!s.ready) return
-    const key = `${state}|${orientation}|${edge}|${overlay}`
+    const key = `${state}|${orientation}|${edge}|${needH}`
     if (geo.current === key) return
     geo.current = key
-    applyGeometry(state, orientation, edge, overlay).then(show)
-  }, [s.ready, state, orientation, edge, overlay])
+    applyGeometry(state, orientation, edge, needH).then(show)
+  }, [s.ready, state, orientation, edge, needH])
 
   useEffect(() => {
     ensurePermission()
@@ -181,9 +184,9 @@ export default function Widget() {
         className="iconBtn"
         title="Settings"
         onClick={() => setPrefs(true)}
-        style={{ width: 20, height: 20, color: 'rgba(255,255,255,0.4)' }}
+        style={{ width: 28, height: 28, color: 'rgba(255,255,255,0.55)' }}
       >
-        <Gear />
+        <Gear size={17} />
       </button>
     </div>
   )
@@ -256,9 +259,9 @@ export default function Widget() {
                 className="iconBtn"
                 title="Settings"
                 onClick={() => setPrefs(true)}
-                style={{ width: 16, height: 16, color: 'rgba(255,255,255,0.4)' }}
+                style={{ width: 22, height: 22, color: 'rgba(255,255,255,0.55)' }}
               >
-                <Gear size={11} />
+                <Gear size={15} />
               </button>
             </div>
           </div>

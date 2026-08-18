@@ -39,11 +39,38 @@ CREATE INDEX IF NOT EXISTS idx_items_task ON checklist_items(task_id);
 CREATE INDEX IF NOT EXISTS idx_logs_date ON time_logs(date);
 ";
 
+/// Keep the widget on every Space, including over full-screen apps.
+///
+/// Tauri's `set_visible_on_all_workspaces` only sets `CanJoinAllSpaces`, which
+/// follows the user between ordinary desktops but still hides the window when a
+/// full-screen app is frontmost. `FullScreenAuxiliary` is the missing half.
+#[cfg(target_os = "macos")]
+fn keep_on_all_spaces(window: &tauri::WebviewWindow) {
+    use objc2_app_kit::{NSWindow, NSWindowCollectionBehavior};
+
+    let Ok(ptr) = window.ns_window() else { return };
+    if ptr.is_null() {
+        return;
+    }
+    // Safety: Tauri hands back the live NSWindow for this webview window, and
+    // this only runs on the main thread during setup.
+    unsafe {
+        let ns = &*(ptr as *const NSWindow);
+        ns.setCollectionBehavior(
+            ns.collectionBehavior()
+                | NSWindowCollectionBehavior::CanJoinAllSpaces
+                | NSWindowCollectionBehavior::FullScreenAuxiliary,
+        );
+    }
+}
+
 #[tauri::command]
 async fn open_review(app: tauri::AppHandle) -> Result<(), String> {
     if let Some(w) = app.get_webview_window("review") {
         let _ = w.show();
         let _ = w.set_focus();
+        // Reused rather than rebuilt, so tell it to re-read the database.
+        let _ = w.emit("tie://refresh", ());
         return Ok(());
     }
     WebviewWindowBuilder::new(&app, "review", WebviewUrl::App("index.html?window=review".into()))
@@ -80,6 +107,15 @@ pub fn run() {
             // No Dock icon on macOS — this is a tray/widget app.
             #[cfg(target_os = "macos")]
             app.set_activation_policy(tauri::ActivationPolicy::Accessory);
+
+            // Follow the user across Spaces and full-screen apps, so the widget is
+            // on whichever desktop they are working in rather than only the one it
+            // was launched on.
+            if let Some(w) = app.get_webview_window("main") {
+                let _ = w.set_visible_on_all_workspaces(true);
+                #[cfg(target_os = "macos")]
+                keep_on_all_spaces(&w);
+            }
 
             let show = MenuItem::with_id(app, "show", "Show Widget", true, None::<&str>)?;
             let review = MenuItem::with_id(app, "review", "Weekly Review", true, None::<&str>)?;

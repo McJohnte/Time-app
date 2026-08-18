@@ -481,3 +481,40 @@ a { color: var(--amber); text-decoration: none; }
   color: rgba(255, 255, 255, 0.5);
   line-height: 1.6;
 }
+
+/* Review window — to-do list carried over from the widget (read-only view). */
+.todos {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 18px 20px;
+  border-radius: 16px;
+  background: rgba(12, 8, 36, 0.45);
+  border: 1px solid rgba(147, 0, 255, 0.18);
+}
+.todoGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(248px, 1fr));
+  gap: 12px;
+  align-items: start;
+}
+.todoCard {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 13px;
+  border-radius: 13px;
+  background: rgba(12, 8, 36, 0.5);
+  border: 1px solid rgba(147, 0, 255, 0.16);
+}
+.todoBox {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 5px;
+  border: 1.5px solid;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.todoBox.sm { width: 13px; height: 13px; border-radius: 4px; }

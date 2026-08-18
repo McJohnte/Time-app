@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react'
+import { listen } from '@tauri-apps/api/event'
 import { weekSummary } from '../week'
-import { fmtH } from '../store'
-import { Logo } from '../icons'
+import { loadTasks } from '../db'
+import { fmt, fmtH } from '../store'
+import { Logo, Tick } from '../icons'
 
 function prettyWeek(iso) {
   if (!iso) return ''
@@ -12,13 +14,27 @@ function prettyWeek(iso) {
 
 export default function ReviewWindow() {
   const [wk, setWk] = useState(null)
+  const [todos, setTodos] = useState([])
 
   useEffect(() => {
     document.body.classList.add('solid')
-    weekSummary().then(setWk)
+    const refresh = () => {
+      weekSummary().then(setWk)
+      loadTasks().then(setTodos)
+    }
+    refresh()
+    // The window is reused rather than rebuilt, so reopening it has to re-read
+    // the database or it would keep showing whatever was true the first time.
+    const un = listen('tie://refresh', refresh)
+    return () => {
+      un.then((f) => f())
+    }
   }, [])
 
   if (!wk) return null
+
+  const open = todos.filter((t) => !t.done)
+  const done = todos.filter((t) => t.done)
 
   return (
     <div className="review">
@@ -188,6 +204,127 @@ export default function ReviewWindow() {
           )}
         </>
       )}
+
+      <div className="todos">
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
+          <span className="label">To-Dos</span>
+          <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.35)' }}>
+            {todos.length
+              ? `${open.length} open · ${done.length} done`
+              : 'nothing on the list'}
+          </span>
+        </div>
+
+        {!todos.length && (
+          <span style={{ fontSize: 13.5, color: 'rgba(255,255,255,0.45)' }}>
+            Tasks you add in the widget show up here, with their steps.
+          </span>
+        )}
+
+        <div className="todoGrid">
+          {[...open, ...done].map((t) => {
+            const ticked = t.items.filter((i) => i.done).length
+            return (
+              <div key={t.id} className="todoCard" style={{ opacity: t.done ? 0.55 : 1 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
+                  <span
+                    className="todoBox"
+                    style={{
+                      background: t.done ? t.color : 'transparent',
+                      borderColor: t.color,
+                    }}
+                  >
+                    {t.done && <Tick size={9} />}
+                  </span>
+                  <span
+                    style={{
+                      flex: 1,
+                      minWidth: 0,
+                      fontFamily: 'var(--sans)',
+                      fontWeight: 600,
+                      fontSize: 13.5,
+                      color: '#fff',
+                      textDecoration: t.done ? 'line-through' : 'none',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {t.name || 'Untitled task'}
+                  </span>
+                  <span
+                    style={{
+                      fontFamily: 'var(--mono)',
+                      fontSize: 12.5,
+                      fontVariantNumeric: 'tabular-nums',
+                      color: 'rgba(255,255,255,0.5)',
+                    }}
+                  >
+                    {fmt(t.seconds)}
+                  </span>
+                </div>
+
+                {!!t.note && (
+                  <span style={{ fontSize: 12, lineHeight: 1.45, color: 'rgba(255,255,255,0.4)' }}>
+                    {t.note}
+                  </span>
+                )}
+
+                {!!t.items.length && (
+                  <>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <div className="barTrack" style={{ flex: 1, height: 4 }}>
+                        <div
+                          style={{
+                            height: '100%',
+                            borderRadius: 999,
+                            width: `${(ticked / t.items.length) * 100}%`,
+                            background: t.color,
+                          }}
+                        />
+                      </div>
+                      <span
+                        style={{
+                          fontFamily: 'var(--mono)',
+                          fontSize: 11,
+                          color: 'rgba(255,255,255,0.42)',
+                        }}
+                      >
+                        {ticked}/{t.items.length}
+                      </span>
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+                      {t.items.map((i) => (
+                        <div key={i.id} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <span
+                            className="todoBox sm"
+                            style={{
+                              background: i.done ? t.color : 'transparent',
+                              borderColor: i.done ? t.color : 'rgba(147,0,255,0.45)',
+                            }}
+                          >
+                            {i.done && <Tick size={7} w={4.2} />}
+                          </span>
+                          <span
+                            style={{
+                              fontSize: 12,
+                              color: 'rgba(255,255,255,0.78)',
+                              textDecoration: i.done ? 'line-through' : 'none',
+                              opacity: i.done ? 0.55 : 1,
+                            }}
+                          >
+                            {i.text}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                )}
+              </div>
+            )
+          })}
+        </div>
+      </div>
     </div>
   )
 }
