@@ -55,6 +55,6 @@ jobs:
           tagName: ${{ github.ref_name }}
           releaseName: 'TIE Timer ${{ github.ref_name }}'
           releaseBody: 'Download the installer for your platform below. Builds are unsigned — see the README for how to open them the first time.'
-          releaseDraft: true
+          releaseDraft: false
           prerelease: false
           args: ${{ matrix.args }}
