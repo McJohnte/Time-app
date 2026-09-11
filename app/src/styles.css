@@ -580,3 +580,43 @@ a { color: var(--amber); text-decoration: none; }
   text-transform: uppercase;
   color: #ffaf00;
 }
+
+/* Drag handle and reorder feedback */
+.grip {
+  flex: none;
+  width: 14px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.22);
+  cursor: grab;
+  transition: color 150ms ease;
+}
+.grip:hover { color: rgba(255, 255, 255, 0.65); }
+.grip:active { cursor: grabbing; }
+.row.over { outline: 1.5px dashed rgba(179, 0, 255, 0.85); outline-offset: -1px; }
+.row.dragging { opacity: 0.45; }
+
+/* Backlog → widget toggle */
+.trackToggle {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 9px;
+  border-radius: 999px;
+  border: 1px solid rgba(147, 0, 255, 0.35);
+  font-family: var(--sans);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  user-select: none;
+  transition: all 180ms ease;
+}
+.trackToggle:hover { color: #fff; border-color: var(--violet); }
+.trackToggle.on { background: linear-gradient(135deg, #4500ff, #b300ff); border-color: transparent; color: #fff; }
+.trackToggle input { display: none; }

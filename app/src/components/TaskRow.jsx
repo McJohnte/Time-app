@@ -1,22 +1,42 @@
 import { PALETTE, fmt } from '../store'
-import { Tick, Chevron, Cross, Stop, Play } from '../icons'
+import { Tick, Chevron, Cross, Stop, Play, Grip } from '../icons'
 
 const uid = () => Math.random().toString(36).slice(2, 10)
 
-export default function TaskRow({ task: t, running, onToggle, onEdit, onDone, onRemove, onItems }) {
+export default function TaskRow({
+  task: t,
+  running,
+  onToggle,
+  onEdit,
+  onDone,
+  onRemove,
+  onItems,
+  drag = {},
+}) {
   const run = running
   const items = t.items || []
   const ticked = items.filter((i) => i.done).length
 
   return (
     <div
-      className="row"
+      className={`row${drag.over ? ' over' : ''}${drag.dragging ? ' dragging' : ''}`}
+      onDragOver={drag.onDragOver}
+      onDrop={drag.onDrop}
       style={{
         background: run ? 'rgba(147,0,255,0.14)' : 'rgba(12,8,36,0.42)',
         border: `1px solid ${run ? 'rgba(147,0,255,0.5)' : 'rgba(147,0,255,0.14)'}`,
       }}
     >
       <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
+        <span
+          className="grip"
+          title="Drag to reorder"
+          draggable
+          onDragStart={drag.onDragStart}
+          onDragEnd={drag.onDragEnd}
+        >
+          <Grip />
+        </span>
         <button
           className="check"
           title="Mark done"
@@ -31,7 +51,11 @@ export default function TaskRow({ task: t, running, onToggle, onEdit, onDone, on
           onChange={(e) => onEdit({ name: e.target.value })}
           placeholder="Name this task"
           spellCheck={false}
-          style={{ textDecoration: t.done ? 'line-through' : 'none', opacity: t.done ? 0.42 : 1 }}
+          style={{
+            color: t.color,
+            textDecoration: t.done ? 'line-through' : 'none',
+            opacity: t.done ? 0.42 : 1,
+          }}
         />
         <button
           className="iconBtn chev"

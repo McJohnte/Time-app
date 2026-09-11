@@ -137,12 +137,23 @@ async fn open_review(app: tauri::AppHandle) -> Result<(), String> {
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    let migrations = vec![Migration {
-        version: 1,
-        description: "create base tables",
-        sql: SCHEMA,
-        kind: MigrationKind::Up,
-    }];
+    let migrations = vec![
+        Migration {
+            version: 1,
+            description: "create base tables",
+            sql: SCHEMA,
+            kind: MigrationKind::Up,
+        },
+        // The to-do list became a backlog: only tasks explicitly marked as
+        // tracked appear in the widget. Everything existing was already in the
+        // widget, so it defaults on.
+        Migration {
+            version: 2,
+            description: "add tracked flag to tasks",
+            sql: "ALTER TABLE tasks ADD COLUMN tracked INTEGER NOT NULL DEFAULT 1;",
+            kind: MigrationKind::Up,
+        },
+    ];
 
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())

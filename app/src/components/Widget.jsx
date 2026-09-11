@@ -14,6 +14,8 @@ export default function Widget() {
   const s = useTimer()
   const [week, setWeek] = useState(null)
   const [prefs, setPrefs] = useState(false)
+  const [overId, setOverId] = useState(null)
+  const dragId = useRef(null)
   const geo = useRef('')
 
   const orientation = s.settings?.orientation ?? 'vertical'
@@ -152,6 +154,31 @@ export default function Widget() {
           onDone={(d) => s.setDone(t.id, d)}
           onRemove={() => s.remove(t.id)}
           onItems={(fn) => s.mutateItems(t.id, fn)}
+          drag={{
+            over: overId === t.id && dragId.current !== t.id,
+            dragging: dragId.current === t.id && overId !== null,
+            onDragStart: (e) => {
+              dragId.current = t.id
+              e.dataTransfer.effectAllowed = 'move'
+              e.dataTransfer.setData('text/plain', t.id)
+            },
+            onDragOver: (e) => {
+              e.preventDefault()
+              e.dataTransfer.dropEffect = 'move'
+              if (overId !== t.id) setOverId(t.id)
+            },
+            onDrop: (e) => {
+              e.preventDefault()
+              const from = dragId.current
+              dragId.current = null
+              setOverId(null)
+              if (from && from !== t.id) s.reorder(from, t.id)
+            },
+            onDragEnd: () => {
+              dragId.current = null
+              setOverId(null)
+            },
+          }}
         />
       ))}
       {!s.tasks.length && (

@@ -47,6 +47,8 @@ export default function TodoWindow() {
       color: PALETTE[tasksRef.current.length % PALETTE.length],
       seconds: 0,
       done: false,
+      // The list is a backlog: nothing reaches the widget until Track is ticked.
+      tracked: false,
       items: [],
     }
     await db.insertTask(t, tasksRef.current.length)
@@ -87,7 +89,9 @@ export default function TodoWindow() {
         <span className="brand">To Do List</span>
         <span className="spacer" />
         <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)' }}>
-          {tasks.length ? `${open.length} open · ${done.length} done` : 'nothing yet'}
+          {tasks.length
+            ? `${open.length} open · ${tasks.filter((t) => t.tracked && !t.done).length} tracked · ${done.length} done`
+            : 'nothing yet'}
         </span>
       </div>
 
@@ -108,7 +112,7 @@ export default function TodoWindow() {
         ))}
         {!tasks.length && (
           <div className="empty" style={{ padding: '30px 0' }}>
-            Add a task here or in the widget — they share one list.
+            This is your backlog. Add tasks here, then tick Track on the ones you want on the widget.
           </div>
         )}
       </div>
@@ -140,18 +144,24 @@ function TodoItem({ task: t, onEdit, onRemove, onItems }) {
           placeholder="Name this task"
           spellCheck={false}
           onChange={(e) => onEdit({ name: e.target.value })}
-          style={{ textDecoration: t.done ? 'line-through' : 'none' }}
+          style={{ color: t.color, textDecoration: t.done ? 'line-through' : 'none' }}
         />
-        <span
-          style={{
-            fontFamily: 'var(--mono)',
-            fontSize: 12,
-            fontVariantNumeric: 'tabular-nums',
-            color: 'rgba(255,255,255,0.45)',
-          }}
-        >
-          {fmt(t.seconds)}
-        </span>
+        {t.tracked && (
+          <span
+            style={{
+              fontFamily: 'var(--mono)',
+              fontSize: 12,
+              fontVariantNumeric: 'tabular-nums',
+              color: 'rgba(255,255,255,0.45)',
+            }}
+          >
+            {fmt(t.seconds)}
+          </span>
+        )}
+        <label className={`trackToggle${t.tracked ? ' on' : ''}`} title={t.tracked ? 'On the widget — untick to send it back to the backlog' : 'Add to the widget tracker'}>
+          <input type="checkbox" checked={!!t.tracked} onChange={(e) => onEdit({ tracked: e.target.checked })} />
+          {t.tracked ? 'Tracking' : 'Track'}
+        </label>
         <button className="iconBtn removeBtn" title="Remove task" onClick={onRemove} style={{ width: 22, height: 22 }}>
           <Cross size={10} />
         </button>

@@ -75,7 +75,7 @@ export function useTimer() {
       setSettings(s)
       const day = db.today()
       const storedDay = await db.getState('day')
-      let loaded = await db.loadTasks()
+      let loaded = (await db.loadTasks()).filter((t) => t.tracked)
       if (storedDay && storedDay !== day) {
         loaded = await rollover(loaded, day, storedDay)
       } else {
@@ -100,7 +100,7 @@ export function useTimer() {
    * next tick would recompute from the anchor anyway.
    */
   async function reloadTasks() {
-    const fresh = await db.loadTasks()
+    const fresh = (await db.loadTasks()).filter((t) => t.tracked)
     const run = runningRef.current
     const runFresh = fresh.find((t) => t.id === run)
     // Stop the clock if the other window removed the running task or ticked it off.
@@ -214,7 +214,6 @@ export function useTimer() {
 
   function wake() {
     setIdle(false)
-    setUsage(false)
     autoHide()
   }
 
@@ -224,10 +223,15 @@ export function useTimer() {
     setUsage(false)
   }
 
+  /**
+   * The usage card has its own close button, so waking (which mouse movement
+   * does constantly) must not dismiss it — that made the card vanish the moment
+   * the cursor moved. Closing it restarts the auto-hide countdown instead.
+   */
   function openUsage(on) {
     clearTimeout(hideTimer.current)
-    setIdle(true)
     setUsage(on)
+    if (!on) wake()
   }
 
   async function flush(id) {
@@ -256,6 +260,7 @@ export function useTimer() {
       color: PALETTE[tasksRef.current.length % PALETTE.length],
       seconds: 0,
       done: false,
+      tracked: true,
       expanded: true,
       items: [],
     }
@@ -280,8 +285,30 @@ export function useTimer() {
       await flush(id)
       anchor(null)
     }
-    setTasks((l) => l.map((t) => (t.id === id ? { ...t, done } : t)))
+    let next = tasksRef.current.map((t) => (t.id === id ? { ...t, done } : t))
+    if (done) {
+      // Finished work sinks to the bottom so what is still open stays in reach.
+      const i = next.findIndex((t) => t.id === id)
+      const [moved] = next.splice(i, 1)
+      next = next.concat([moved])
+    }
+    setTasks(next)
     await db.updateTask(id, { done })
+    if (done) await db.savePositions(next.map((t) => t.id))
+    notify()
+  }
+
+  /** Drag-and-drop: move `fromId` to where `toId` sits. */
+  async function reorder(fromId, toId) {
+    const cur = tasksRef.current
+    const from = cur.findIndex((t) => t.id === fromId)
+    const to = cur.findIndex((t) => t.id === toId)
+    if (from < 0 || to < 0 || from === to) return
+    const next = cur.slice()
+    const [moved] = next.splice(from, 1)
+    next.splice(to, 0, moved)
+    setTasks(next)
+    await db.savePositions(next.map((t) => t.id))
     notify()
   }
 
@@ -369,6 +396,7 @@ export function useTimer() {
     allDone,
     mutateItems,
     remove,
+    reorder,
     carryOver,
     setReminder,
     update,

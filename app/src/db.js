@@ -23,6 +23,8 @@ export async function loadTasks() {
     color: t.color,
     seconds: t.seconds,
     done: !!t.done,
+    // Older rows predate the column; treat missing as tracked.
+    tracked: t.tracked === undefined || t.tracked === null ? true : !!t.tracked,
     expanded: false,
     items: items
       .filter((i) => i.task_id === t.id)
@@ -33,8 +35,8 @@ export async function loadTasks() {
 export async function insertTask(t, position) {
   const d = await open()
   await d.execute(
-    'INSERT INTO tasks (id, name, note, color, seconds, done, position, created_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8)',
-    [t.id, t.name, t.note, t.color, t.seconds, t.done ? 1 : 0, position, new Date().toISOString()]
+    'INSERT INTO tasks (id, name, note, color, seconds, done, position, created_at, tracked) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)',
+    [t.id, t.name, t.note, t.color, t.seconds, t.done ? 1 : 0, position, new Date().toISOString(), t.tracked === false ? 0 : 1]
   )
 }
 
@@ -43,13 +45,21 @@ export async function updateTask(id, fields) {
   const cols = []
   const vals = []
   for (const [k, v] of Object.entries(fields)) {
-    if (!['name', 'note', 'color', 'seconds', 'done'].includes(k)) continue
+    if (!['name', 'note', 'color', 'seconds', 'done', 'tracked'].includes(k)) continue
     cols.push(`${k} = $${cols.length + 1}`)
     vals.push(typeof v === 'boolean' ? (v ? 1 : 0) : v)
   }
   if (!cols.length) return
   vals.push(id)
   await d.execute(`UPDATE tasks SET ${cols.join(', ')} WHERE id = $${vals.length}`, vals)
+}
+
+/** Persist a display order: index in `ids` becomes the task's position. */
+export async function savePositions(ids) {
+  const d = await open()
+  for (let i = 0; i < ids.length; i++) {
+    await d.execute('UPDATE tasks SET position = $1 WHERE id = $2', [i, ids[i]])
+  }
 }
 
 export async function deleteTask(id) {
