@@ -94,6 +94,27 @@ fn pin_widget(window: tauri::WebviewWindow) {
     }
 }
 
+/// A small standalone window for the to-do list, so tasks can be managed
+/// without opening the full review.
+#[tauri::command]
+async fn open_todo(app: tauri::AppHandle) -> Result<(), String> {
+    if let Some(w) = app.get_webview_window("todo") {
+        let _ = w.show();
+        let _ = w.set_focus();
+        let _ = w.emit("tie://refresh", ());
+        return Ok(());
+    }
+    WebviewWindowBuilder::new(&app, "todo", WebviewUrl::App("index.html?window=todo".into()))
+        .title("TIE Timer — To Do List")
+        .inner_size(420.0, 640.0)
+        .min_inner_size(340.0, 480.0)
+        .resizable(true)
+        .center()
+        .build()
+        .map_err(|e| e.to_string())?;
+    Ok(())
+}
+
 #[tauri::command]
 async fn open_review(app: tauri::AppHandle) -> Result<(), String> {
     if let Some(w) = app.get_webview_window("review") {
@@ -132,7 +153,7 @@ pub fn run() {
                 .add_migrations("sqlite:tie-timer.db", migrations)
                 .build(),
         )
-        .invoke_handler(tauri::generate_handler![open_review, pin_widget])
+        .invoke_handler(tauri::generate_handler![open_review, open_todo, pin_widget])
         .setup(|app| {
             // No Dock icon on macOS — this is a tray/widget app.
             #[cfg(target_os = "macos")]

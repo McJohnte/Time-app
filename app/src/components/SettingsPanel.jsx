@@ -52,9 +52,9 @@ export default function SettingsPanel({ settings, onDock, onChange, onClose }) {
             className="iconBtn"
             title="Close"
             onClick={onClose}
-            style={{ width: 18, height: 18, color: 'rgba(255,255,255,0.35)' }}
+            style={{ width: 30, height: 30, color: 'rgba(255,255,255,0.55)' }}
           >
-            <Cross size={10} w={2.6} />
+            <Cross size={16} w={2.4} />
           </button>
         </div>
 

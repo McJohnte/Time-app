@@ -1,8 +1,8 @@
 {
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
-  "description": "Permissions for the TIE Timer widget and review windows",
-  "windows": ["main", "review"],
+  "description": "Permissions for the TIE Timer widget, review and to-do windows",
+  "windows": ["main", "review", "todo"],
   "permissions": [
     "core:default",
     "core:window:allow-show",

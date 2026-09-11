@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { emit, listen } from '@tauri-apps/api/event'
 import * as db from './db'
 import { loadSettings, saveSetting } from './settings'
 
@@ -76,7 +77,7 @@ export function useTimer() {
       const storedDay = await db.getState('day')
       let loaded = await db.loadTasks()
       if (storedDay && storedDay !== day) {
-        loaded = await rollover(loaded, day)
+        loaded = await rollover(loaded, day, storedDay)
       } else {
         const g = await db.getState('general')
         if (g) setGeneral(parseInt(g, 10) || 0)
@@ -86,6 +87,45 @@ export function useTimer() {
       setTasks(loaded)
       setReady(true)
     })()
+  }, [])
+
+  /** Tell the other windows the task list changed. */
+  function notify() {
+    emit('tie://tasks-changed', { from: 'widget' }).catch(() => {})
+  }
+
+  /**
+   * Re-read tasks after another window edited them. The running task keeps
+   * its live seconds — the database only has the last 15s flush, and the
+   * next tick would recompute from the anchor anyway.
+   */
+  async function reloadTasks() {
+    const fresh = await db.loadTasks()
+    const run = runningRef.current
+    const runFresh = fresh.find((t) => t.id === run)
+    // Stop the clock if the other window removed the running task or ticked it off.
+    if (run && (!runFresh || runFresh.done)) {
+      if (runFresh) await flush(run)
+      setRunning(null)
+      anchor(null)
+    }
+    setTasks((cur) => {
+      const live = cur.find((t) => t.id === run)
+      return fresh.map((t) => {
+        const prev = cur.find((x) => x.id === t.id)
+        const seconds = t.id === run && live ? live.seconds : t.seconds
+        return { ...t, seconds, expanded: prev ? prev.expanded : false }
+      })
+    })
+  }
+
+  useEffect(() => {
+    const un = listen('tie://tasks-changed', (e) => {
+      if (e.payload?.from !== 'widget') reloadTasks()
+    })
+    return () => {
+      un.then((f) => f())
+    }
   }, [])
 
   /** Re-base the wall-clock anchor on the currently running task. */
@@ -221,13 +261,17 @@ export function useTimer() {
     }
     setTasks((l) => l.concat([t]))
     await db.insertTask(t, tasksRef.current.length)
+    notify()
   }
 
   async function edit(id, fields) {
     setTasks((l) => l.map((t) => (t.id === id ? { ...t, ...fields } : t)))
     const persist = { ...fields }
     delete persist.expanded
-    if (Object.keys(persist).length) await db.updateTask(id, persist)
+    if (Object.keys(persist).length) {
+      await db.updateTask(id, persist)
+      notify()
+    }
   }
 
   async function setDone(id, done) {
@@ -238,6 +282,7 @@ export function useTimer() {
     }
     setTasks((l) => l.map((t) => (t.id === id ? { ...t, done } : t)))
     await db.updateTask(id, { done })
+    notify()
   }
 
   async function allDone() {
@@ -249,6 +294,7 @@ export function useTimer() {
     }
     setTasks((l) => l.map((t) => ({ ...t, done: true })))
     for (const t of tasksRef.current) await db.updateTask(t.id, { done: true })
+    notify()
   }
 
   async function mutateItems(id, fn) {
@@ -257,6 +303,7 @@ export function useTimer() {
     const next = fn(cur.items || [])
     setTasks((l) => l.map((t) => (t.id === id ? { ...t, items: next } : t)))
     await db.replaceItems(id, next)
+    notify()
   }
 
   async function remove(id) {
@@ -267,11 +314,26 @@ export function useTimer() {
     }
     setTasks((l) => l.filter((t) => t.id !== id))
     await db.deleteTask(id)
+    notify()
   }
 
+  /**
+   * Carry Over closes out the reminder without touching the clocks. Today's
+   * time is already logged incrementally and stays on the tasks until the
+   * midnight rollover, which is what actually starts the next day at zero —
+   * so yesterday's hours are recorded but never counted against tomorrow.
+   *
+   * Zeroing here was a data-loss bug: the reset clock's next flush overwrote
+   * the day's log with the post-reset figure.
+   */
   async function carryOver() {
+    const run = runningRef.current
+    if (run) {
+      setRunning(null)
+      await flush(run)
+      anchor(null)
+    }
     setReminder(false)
-    setTasks(await rollover(tasksRef.current, db.today()))
   }
 
   async function update(key, value) {

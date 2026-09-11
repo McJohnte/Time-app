@@ -9,7 +9,9 @@ import '@fontsource/roboto/500.css'
 import './styles.css'
 import Widget from './components/Widget'
 import ReviewWindow from './components/ReviewWindow'
+import TodoWindow from './components/TodoWindow'
 
-const isReview = new URLSearchParams(location.search).get('window') === 'review'
+const which = new URLSearchParams(location.search).get('window')
+const Root = which === 'review' ? ReviewWindow : which === 'todo' ? TodoWindow : Widget
 
-createRoot(document.getElementById('root')).render(isReview ? <ReviewWindow /> : <Widget />)
+createRoot(document.getElementById('root')).render(<Root />)

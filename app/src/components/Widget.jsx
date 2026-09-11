@@ -131,7 +131,17 @@ export default function Widget() {
   )
 
   const list = (
-    <div className={`taskList ${orientation}`}>
+    <div
+      className={`taskList ${orientation}`}
+      onWheel={(e) => {
+        // A mouse wheel only produces vertical deltas; in the horizontal bar
+        // that would scroll nothing, so steer it sideways instead.
+        if (orientation === 'horizontal' && Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+          e.currentTarget.scrollLeft += e.deltaY
+        }
+        s.wake()
+      }}
+    >
       {s.tasks.map((t) => (
         <TaskRow
           key={t.id}
@@ -177,6 +187,9 @@ export default function Widget() {
       <button className="linkBtn" onClick={() => s.openUsage(true)}>
         Usage
       </button>
+      <button className="linkBtn" onClick={() => invoke('open_todo')}>
+        To Do List
+      </button>
       <button className="linkBtn" onClick={() => invoke('open_review')}>
         Review
       </button>
@@ -197,6 +210,10 @@ export default function Widget() {
       onMouseEnter={s.wake}
       onMouseMove={s.wake}
       onMouseDown={s.wake}
+      // Typing is activity too — without this the panel slid away mid-sentence.
+      onKeyDown={s.wake}
+      onInput={s.wake}
+      onFocus={s.wake}
       style={{ position: 'relative' }}
     >
       {orientation === 'vertical' ? (
@@ -216,7 +233,7 @@ export default function Widget() {
           <div
             style={{
               flex: 'none',
-              width: 186,
+              width: 214,
               display: 'flex',
               flexDirection: 'column',
               gap: 6,
@@ -251,6 +268,9 @@ export default function Widget() {
               <span className="spacer" />
               <button className="linkBtn" style={{ fontSize: 10 }} onClick={() => s.openUsage(true)}>
                 Usage
+              </button>
+              <button className="linkBtn" style={{ fontSize: 10 }} onClick={() => invoke('open_todo')}>
+                To Do
               </button>
               <button className="linkBtn" style={{ fontSize: 10 }} onClick={() => invoke('open_review')}>
                 Review

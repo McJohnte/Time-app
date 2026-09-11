@@ -8,9 +8,15 @@ export async function weekSummary(ref = new Date()) {
   const dates = weekDates(ref)
   const rows = await weekRows(dates)
 
+  // Group by name, not id: carrying a task over creates a fresh id each day,
+  // and people also retype the same task. Untitled tasks stay separate since
+  // an empty name says nothing about whether they are the same work.
+  const keyOf = (r) => (r.task_name || '').trim().toLowerCase() || `#${r.task_id}`
+
   const byTask = new Map()
   for (const r of rows) {
-    const hit = byTask.get(r.task_id) || {
+    const key = keyOf(r)
+    const hit = byTask.get(key) || {
       name: r.task_name || 'Untitled task',
       color: r.color,
       h: [0, 0, 0, 0, 0],
@@ -22,7 +28,7 @@ export async function weekSummary(ref = new Date()) {
     hit.total += hours
     hit.name = r.task_name || hit.name
     hit.color = r.color || hit.color
-    byTask.set(r.task_id, hit)
+    byTask.set(key, hit)
   }
 
   const tasks = [...byTask.values()].sort((a, b) => b.total - a.total)
@@ -79,11 +85,18 @@ export async function weekSummary(ref = new Date()) {
     })),
     days: DAYS.map((d, i) => ({
       label: d,
+      long: DAY_LONG[d],
+      total: fmtH(dayTotals[i]),
       h: maxDay > 0 ? `${((dayTotals[i] / maxDay) * 100).toFixed(1)}%` : '0%',
       labelColor: dayTotals[i] === maxDay && maxDay > 0 ? '#ffaf00' : 'rgba(255,255,255,0.45)',
       segs: tasks
         .filter((t) => t.h[i] > 0)
-        .map((t) => ({ color: t.color, h: `${((t.h[i] / dayTotals[i]) * 100).toFixed(1)}%` })),
+        .map((t) => ({
+          name: t.name,
+          hours: fmtH(t.h[i]),
+          color: t.color,
+          h: `${((t.h[i] / dayTotals[i]) * 100).toFixed(1)}%`,
+        })),
     })),
     notes,
   }
